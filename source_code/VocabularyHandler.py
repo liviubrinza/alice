@@ -1,21 +1,40 @@
 from nltk.stem import LancasterStemmer
 
+
 class VocabularyHandler:
 
+    # input file containing the training corpus
+    input_TrainingCorpus = "trainingCorpus.txt"
+    # output file containing the refined training corpus
+    refined_TrainingCorpus = "refinedTrainingData.txt"
+    # the modal verbs we will omit
     modal_verbs = ['can', 'could', 'should', 'would', 'may', 'might', 'will', 'would', 'must']
+    # random words to be omitted
     irrelevant_word = ['please', 'the']
 
     def __init__(self):
         # will contain all the all the dictionaries of type {category : sentence}
-        self.sentenceDictList = []
+        self.trainingDataList = []
         # will contain all the known words
-        self.entireVocabulary = []
+        self.entireVocabulary = set()
+        self.word_stemmer = LancasterStemmer()
+        self.removable_words = self.modal_verbs + self.irrelevant_word
+        # the longest sequence of words in the refined sentences
+        self.max_words = 0
+
+    def processSentence(self, inputSentence):
+        return_sentence = ""
+
+        for word in inputSentence.split():
+            if word not in self.removable_words:
+                return_sentence += " " + self.word_stemmer.stem(word)
+
+        return return_sentence.strip()
 
     def processTrainingData(self):
-        word_stemmer = LancasterStemmer()
+
         # put together all the unnecessary words in one place
-        removable_words = self.modal_verbs + self.irrelevant_word
-        inputFile = open("trainingCorpus.txt", "r")
+        inputFile = open(self.input_TrainingCorpus, "r")
 
         for line in inputFile:
             # read one line of text at a time
@@ -28,33 +47,34 @@ class VocabularyHandler:
             # also, remove "?" and "!" form the string
             sentence = line.split(":")[1].strip().replace('?', '').replace('!', '')
 
-            # remove any modal verb from the sentence
-            sentence = " ".join([word for word in sentence.split() if word not in removable_words])
+            sentence = self.processSentence(sentence)
 
-            # split by words -> stem all the words -> reassemble the sentence
-            sentence = " ".join([word_stemmer.stem(word) for word in sentence.split()])
+            # just out of curiosity, save the longest sentence (counting words)
+            if len(sentence.split()) > self.max_words:
+                self.max_words = len(sentence.split())
 
             # add the new {category : sentence} pairs into our sentence list
-            self.sentenceDictList.append({category: sentence})
+            self.trainingDataList.append({category: sentence})
             # add all the new words into our vocabulary
-            self.entireVocabulary.extend(sentence.split())
+            self.entireVocabulary.update(sentence.split())
 
         inputFile.close()
         del inputFile
 
-        self.entireVocabulary = (list(set(self.entireVocabulary)))
-        self.entireVocabulary.sort()
-
-    def getSentenceDictList(self):
-        return self.sentenceDictList
+    def getTrainingDataList(self):
+        return self.trainingDataList
 
     def getEntireVocabulary(self):
-        return self.entireVocabulary
+        return sorted(self.entireVocabulary)
+
+    def getMaxWords(self):
+        print("Max words count: %s" % self.max_words)
+        #return self.max_words
 
     def createRefinedTrainingDataFile(self):
-        outputFile = open("refinedTrainingData.txt", "w")
+        outputFile = open(self.refined_TrainingCorpus, "w")
 
-        for element in self.sentenceDictList:
+        for element in self.trainingDataList:
             outputFile.write(str(element) + "\n")
 
         outputFile.close()
@@ -63,9 +83,11 @@ class VocabularyHandler:
 vocHandler = VocabularyHandler()
 vocHandler.processTrainingData()
 print()
-print("All sentences: %s" % vocHandler.getSentenceDictList())
+print("All sentences: %s" % vocHandler.getTrainingDataList())
+vocHandler.getMaxWords()
 print()
 print("Vocabulary size: %s" % vocHandler.getEntireVocabulary().__len__())
 print("All the vocabulary: %s" % vocHandler.getEntireVocabulary())
+
 
 vocHandler.createRefinedTrainingDataFile()
