@@ -4,6 +4,13 @@ greeting : hello there
 greeting : hi
 greeting : hi there
 greeting : hello alice
+greeting : good morning
+greeting : good day
+greeting : good afternoon
+greeting : good evening
+greeting : good night
+greeting : what's up?
+greeting : hey
 
 lights on : turn on the lights
 lights on : could you turn the light on?
@@ -16,6 +23,11 @@ lights on : make it brighter
 lights on : i can't see
 lights on : i need light
 lights on : lights on
+lights on: switch on the light
+lights on: switch the lights on
+lights on: please switch on the light
+lights on: could you switch the lights on
+lights on: would you switch the lights on
 
 lights off : turn off the lights
 lights off : could you turn the light off
@@ -26,6 +38,10 @@ lights off : there is too much light
 lights off : make it darker
 lights off : would you turn the light off please
 lights off : lights off
+lights off : switch off the light
+lights off : switch the lights off
+lights off : could you switch the lights off
+lights off : would you switch the lights off
 
 heat up : make it warmer
 heat up : it's cold
@@ -39,6 +55,9 @@ heat up : make it warmer please
 heat up : make it hotter please
 heat up : turn up the heat
 heat up : heat up
+heat up : i am cold
+heat up : it's chilly
+heat up : switch on the heating
 
 heat down : make it colder
 heat down : make it cooler
