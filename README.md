@@ -12,3 +12,9 @@ History
 - Created Vocabulary Handler class
 - Created inpu commands corpus
 - Updated readme
+
+#29 Nov 2017
+- Enhanced Vocabulary Handler class
+- Added training corpus encoding
+- Expanded training corpus
+- Updated readme
