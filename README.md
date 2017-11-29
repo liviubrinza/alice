@@ -1,4 +1,4 @@
-# janice
+# alice
 home automation A.I. project
 
 History
