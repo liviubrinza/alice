@@ -18,3 +18,6 @@ History
 - Added training corpus encoding
 - Expanded training corpus
 - Updated readme
+
+#7 Dec 2017
+- Added hardware topology visio drawing
