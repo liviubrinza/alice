@@ -21,3 +21,7 @@ History
 
 #7 Dec 2017
 - Added hardware topology visio drawing
+
+#10 Ian 2018
+- Added software topology visio drawing
+- Finished first draft of the project proposal documentation
