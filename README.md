@@ -25,3 +25,7 @@ History
 #10 Ian 2018
 - Added software topology visio drawing
 - Finished first draft of the project proposal documentation
+
+#7 Oct 2018
+- Added initial tensorflow application test
+- Created a tensorflow movie review sentiment analyzer
