@@ -29,3 +29,6 @@ History
 #7 Oct 2018
 - Added initial tensorflow application test
 - Created a tensorflow movie review sentiment analyzer
+
+# 11 Oct 2018
+- First run of digit classifier nn using tensorflow, on mnit dataset
