@@ -31,4 +31,4 @@ History
 - Created a tensorflow movie review sentiment analyzer
 
 # 11 Oct 2018
-- First run of digit classifier nn using tensorflow, on mnit dataset
+- First run of digit classifier nn using tensorflow, on mnist dataset

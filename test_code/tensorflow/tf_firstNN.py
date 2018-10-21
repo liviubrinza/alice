@@ -99,4 +99,7 @@ def train_neural_network(x):
 
 train_neural_network(x)
 
-
+"""
+    Using the mnist data set, this created a neural network that trained over the input and spat a 
+    final accuracy of 0.95 over 10 epochs 
+"""
