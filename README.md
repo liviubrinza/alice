@@ -32,3 +32,7 @@ History
 
 # 11 Oct 2018
 - First run of digit classifier nn using tensorflow, on mnist dataset
+
+#21 Oct 2018
+- added script for sentiment featureset creation and a nn to use them.
+Also, the accuracy result was horrible
