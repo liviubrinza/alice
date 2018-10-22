@@ -1,4 +1,4 @@
-# alice
+# A.L.I.C.E.
 home automation A.I. project
 
 History
