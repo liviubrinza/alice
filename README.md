@@ -40,3 +40,8 @@ Also, the accuracy result was horrible
 # 22 Oct 2018
 - added OneHotEncoder class for training data and lexicon persistent generation
 - added encode_sentence(sentence) method to be able to encode any arbitrary sentence
+
+# 29 Oct 2018
+- added first tensorflow neural network to actually work on the smart home training corpus
+
+*NOTE: Seems very unlikely, but the loss converged to 0.0 (100% accuracy) in under 30 epochs* 
