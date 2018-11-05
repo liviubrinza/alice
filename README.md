@@ -44,4 +44,8 @@ Also, the accuracy result was horrible
 # 29 Oct 2018
 - added first tensorflow neural network to actually work on the smart home training corpus
 
-*NOTE: Seems very unlikely, but the loss converged to 0.0 (100% accuracy) in under 30 epochs* 
+*NOTE: Seems very unlikely, but the loss converged to 0.0 (100% accuracy) in under 30 epochs*
+
+# 5 Nov 2018
+- added a second FFNN version using tensorflow
+- added session saving and storing example
