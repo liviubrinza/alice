@@ -1,6 +1,5 @@
-import pickle
-
 import numpy as np
+from FileHandler import FileHandler
 from nltk.stem import SnowballStemmer
 
 
@@ -10,30 +9,20 @@ class OneHotEncoder:
     # random words to be omitted
     irrelevant_word = ['please', 'the']
 
-    # input file containing the training corpus
-    input_training_corpus = "trainingCorpus.txt"
-    # file containing the stemmed training corpus
-    refined_training_corpus = "refinedTrainingData.txt"
-    # output file containing the encoded training corpus
-    encoded_training_corpus = "encodedTrainingData.txt"
-    # contains the used lexicon
-    lexicon_pickle_file = 'lexicon.pickle'
-    # contains the encoded (final) training corpus
-    training_pickle_file = "training_corpus.pickle"
-
     def __init__(self):
         # will contain all the training entries of type [encoded_sentence : encoded_category]
         self.training_corpus_list = list()
         # will contain all the known words
         self.lexicon = list()
+        self.categories = list()
         # the nltk stemmer we use
         self.word_stemmer = SnowballStemmer('english')
         # union of all unwanted words
         self.removable_words = self.modal_verbs + self.irrelevant_word
+        self.file_handler = FileHandler()
 
     def create_refined_training_corpus(self):
-        training_content = self.read_entire_file(self.input_training_corpus)
-
+        training_content = self.file_handler.read_training_corpus()
         stemmed_content = list()
 
         for entry in training_content:
@@ -43,24 +32,25 @@ class OneHotEncoder:
             stemmed_entry = self.stem_entry(entry)
 
             if stemmed_entry not in stemmed_content:
-                stemmed_content.append(self.stem_entry(entry))
+                stemmed_content.append(stemmed_entry)
 
-        self.write_refined_training_data(stemmed_content)
+        refined_training_data_list = [entry[0] + " : " + entry[1] for entry in stemmed_content]
+        self.file_handler.write_refined_training_corpus(refined_training_data_list)
 
     def create_encoded_training_corpus(self):
-
         if not self.lexicon:
             self.create_lexicon()
 
-        refined_content = self.read_entire_file(self.refined_training_corpus)
+        refined_content = self.file_handler.read_refined_training_corpus()
 
         category_list = list()
         entries = list()
         final_entries = list()
 
         for entry in refined_content:
-            category = entry.split(":")[0].strip()
-            sentence = entry.split(":")[1].strip()
+            split_content = entry.split(":")
+            category = split_content[0].strip()
+            sentence = split_content[1].strip()
 
             if category not in category_list:
                 category_list.append(category)
@@ -74,9 +64,9 @@ class OneHotEncoder:
             # here we swap from [category, sentence] to [sentence, category]
             final_entries.append([entry[1], encoded_category])
 
-        with open(self.training_pickle_file, 'wb') as file:
-            pickle.dump(final_entries, file)
-            file.close()
+        self.categories = category_list
+        self.training_corpus_list = final_entries
+        self.file_handler.write_training_pickle(final_entries)
 
     def encode_category(self, categories_list, category):
         encoded_category = np.zeros(len(categories_list))
@@ -86,18 +76,12 @@ class OneHotEncoder:
 
         return encoded_category
 
-    def load_training_corpus(self):
-        with open(self.training_pickle_file, 'rb') as file:
-            self.training_corpus_list = pickle.load(file)
-            file.close()
-
     def encode_sentence(self, sentence):
-
         sentence = self.strip_sentence(sentence)
         sentence = self.stem_sentence(sentence)
 
         if not self.lexicon:
-            self.load_lexicon()
+            self.file_handler.read_lexicon_pickle()
 
         features = np.zeros(len(self.lexicon))
 
@@ -109,7 +93,7 @@ class OneHotEncoder:
         return features
 
     def create_lexicon(self):
-        refined_content = self.read_entire_file(self.refined_training_corpus)
+        refined_content = self.file_handler.read_refined_training_corpus()
 
         for entry in refined_content:
             sentence = entry.split(":")[1].strip()
@@ -118,30 +102,7 @@ class OneHotEncoder:
                 if word not in self.lexicon:
                     self.lexicon.append(word)
 
-        with open(self.lexicon_pickle_file, 'wb') as file:
-            pickle.dump(self.lexicon, file)
-            file.close()
-
-    def load_lexicon(self):
-        with open(self.lexicon_pickle_file, 'rb') as file:
-            self.lexicon = pickle.load(file)
-            file.close()
-
-    def write_refined_training_data(self, content):
-        output_file = open(self.refined_training_corpus, 'w')
-
-        [output_file.write("%s : %s\n" % (entry[0], entry[1])) for entry in content]
-
-        output_file.close()
-
-    def read_entire_file(self, file_name):
-        input_file = open(file_name, 'r')
-
-        content = input_file.readlines()
-
-        input_file.close()
-
-        return content
+        self.file_handler.write_lexicon_pickle(self.lexicon)
 
     def stem_entry(self, entry):
         # input -> [category: sentence]
@@ -166,12 +127,23 @@ class OneHotEncoder:
 
         return stemmed.strip()
 
+    def pickle_entire_data(self):
+        if self.lexicon is not None and self.training_corpus_list is not None:
+            self.file_handler.write_vocabulary_data_pickle([self.lexicon, self.categories, self.training_corpus_list])
+
+    def load_entire_data_from_pickle(self):
+        self.lexicon, self.categories, self.training_corpus_list = self.file_handler.read_vocabulary_data_pickle()
+
+    def load_data(self):
+        if not self.file_handler.vocabulary_data_pickle_exists():
+            self.create_refined_training_corpus()
+            self.create_lexicon()
+            self.create_encoded_training_corpus()
+            self.pickle_entire_data()
+
+        self.load_entire_data_from_pickle()
 
 if __name__ == '__main__':
     encoder = OneHotEncoder()
-    # encoder.create_refined_training_corpus()
-    # encoder.create_lexicon()
-    # encoder.load_lexicon()
-    # encoder.create_encoded_training_corpus()
-    # encoder.load_training_corpus()
-    # encoder.encode_sentence("Please turn on the light")
+    encoder.load_data()
+    print(encoder.encode_sentence("Please turn on the light"))

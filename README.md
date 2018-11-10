@@ -49,3 +49,8 @@ Also, the accuracy result was horrible
 # 5 Nov 2018
 - added a second FFNN version using tensorflow
 - added session saving and storing example
+
+# 10 Nov 2018
+- isolated all file specific operation into their own class (FileHandler)
+- updated the OneHotEncoder startup flow
+- extended the training corpus a little bit
