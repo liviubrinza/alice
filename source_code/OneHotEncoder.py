@@ -2,7 +2,6 @@ import numpy as np
 from FileHandler import FileHandler
 from nltk.stem import SnowballStemmer
 
-
 class OneHotEncoder:
     # the modal verbs we will omit
     modal_verbs = ['can', 'could', 'should', 'would', 'may', 'might', 'will', 'would', 'must']

@@ -54,3 +54,9 @@ Also, the accuracy result was horrible
 - isolated all file specific operation into their own class (FileHandler)
 - updated the OneHotEncoder startup flow
 - extended the training corpus a little bit
+
+# 11 Nov 2018
+- separated neural network into its own class
+- hooked up end to end dataflow from sentence input to classification output
+- first running version of the FFNN classifier using one hot encoding
+- removed old / unused files

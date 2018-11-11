@@ -8,7 +8,7 @@ from OneHotEncoder import OneHotEncoder
 
 encoder = OneHotEncoder()
 
-encoder.load_training_corpus()
+encoder.load_data()
 trainingCorpus = encoder.training_corpus_list
 
 random.shuffle(trainingCorpus)
@@ -39,8 +39,6 @@ cost_history = np.empty(shape=[1], dtype=float)
 model_path = "/mnt/28385DB3385D812C/GitBase/alice/source_code/trained_model/"
 
 x = tf.placeholder(tf.float32, [None, input_layer_size])
-W = tf.Variable(tf.zeros([input_layer_size, output_layer_size]))
-b = tf.Variable(tf.zeros([output_layer_size]))
 y_ = tf.placeholder(tf.float32, [None, output_layer_size])
 
 def multilayer_perceptron(x, weights, biases):
@@ -101,8 +99,8 @@ for epoch in range(training_epochs):
 
     print("epoch: ", epoch, " - ", "cost", cost, " - MSE: ", mse_, " - train accuracy: ", accuracy)
 
-#save_path = saver.save(sess, model_path)
-#print("Model saved in file: %s", save_path)
+save_path = saver.save(sess, model_path)
+print("Model saved in file: %s", save_path)
 
 # plt.plot(mse_history, 'r')
 # plt.show()
