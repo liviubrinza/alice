@@ -15,15 +15,15 @@ class NeuralNetwork:
         self.encoder = encoder
         self.model_path = "/mnt/28385DB3385D812C/GitBase/alice/source_code/trained_model/"
 
-        trainingCorpus = self.encoder.training_corpus_list
+        training_corpus = self.encoder.training_corpus_list
 
-        random.shuffle(trainingCorpus)
+        random.shuffle(training_corpus)
 
         # test data size = 10% * training corpus
-        testing_size = int(0.1 * len(trainingCorpus))
+        testing_size = int(0.1 * len(training_corpus))
 
-        training_set = trainingCorpus[:-testing_size]
-        testing_set = trainingCorpus[-testing_size:]
+        training_set = training_corpus[:-testing_size]
+        testing_set = training_corpus[-testing_size:]
 
         self.train_x = list(x[0] for x in training_set)
         self.train_y = list(x[1] for x in training_set)
@@ -78,7 +78,7 @@ class NeuralNetwork:
         y = self.multilayer_perceptron(self.x, self.weights, self.biases)
 
         cost_function = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=y, labels=self.y_))
-        training_step = tf.train.GradientDescentOptimizer(self.learning_rate).minimize(cost_function)
+        optimizer = tf.train.GradientDescentOptimizer(self.learning_rate).minimize(cost_function)
 
         sess = tf.Session()
         sess.run(init)
@@ -87,7 +87,7 @@ class NeuralNetwork:
         accuracy_history = []
 
         for epoch in range(self.training_epochs):
-            sess.run(training_step, feed_dict={self.x: self.train_x, self.y_: self.train_y})
+            sess.run(optimizer, feed_dict={self.x: self.train_x, self.y_: self.train_y})
             cost = sess.run(cost_function, feed_dict={self.x: self.train_x, self.y_: self.train_y})
             self.cost_history = np.append(self.cost_history, cost)
             correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(self.y_, 1))
@@ -106,17 +106,24 @@ class NeuralNetwork:
 
     def classify(self, command):
         init = tf.global_variables_initializer()
-        y = self.multilayer_perceptron(self.x, self.weights, self.biases)
+        feed_forward_output = self.multilayer_perceptron(self.x, self.weights, self.biases)
 
         self.saver = tf.train.Saver()
         sess = tf.Session()
         sess.run(init)
         self.saver.restore(sess, self.model_path)
 
-        prediction = tf.argmax(y, 1)
-        prediction_run = sess.run(prediction, feed_dict={self.x: command.reshape(1, self.input_layer_size)})
+        # print(sess.run(feed_forward_output, feed_dict={self.x: command.reshape(1, self.input_layer_size)}))
 
-        return np.asscalar(prediction_run)
+        array_prediction = tf.nn.softmax(feed_forward_output, 1)
+        array_pred_run = sess.run(array_prediction, feed_dict={self.x: command.reshape(1, self.input_layer_size)})
+
+        class_prediction = tf.argmax(feed_forward_output, 1)
+        class_pred_run = sess.run(class_prediction, feed_dict={self.x: command.reshape(1, self.input_layer_size)})
+
+        # print("-> Predictions array: " + str(array_pred_run))
+        # print("-> Prediction class: " + str(np.asscalar(class_pred_run)))
+        return np.asscalar(class_pred_run)
 
 if __name__ == '__main__':
     encoder = OneHotEncoder()
@@ -125,8 +132,8 @@ if __name__ == '__main__':
     # net.do_training()
 
     sentence = encoder.encode_sentence("Turn on the light")
-    print(net.classify(sentence))
+    print(encoder.categories[net.classify(sentence)])
     sentence = encoder.encode_sentence("hello there")
-    print(net.classify(sentence))
-    sentence = encoder.encode_sentence("I am cold")
-    print(net.classify(sentence))
+    print(encoder.categories[net.classify(sentence)])
+    sentence = encoder.encode_sentence("make it warmer")
+    print(encoder.categories[net.classify(sentence)])
