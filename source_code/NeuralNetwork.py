@@ -45,6 +45,8 @@ class NeuralNetwork:
         self.x = tf.placeholder(tf.float32, [None, self.input_layer_size])
         self.y_ = tf.placeholder(tf.float32, [None, self.output_layer_size])
 
+        self.session = tf.Session()
+
         self.weights = {
             "h1": tf.Variable(tf.truncated_normal([self.input_layer_size, self.n_nodes_hl1])),
             "h2": tf.Variable(tf.truncated_normal([self.n_nodes_hl1, self.n_nodes_hl2])),
@@ -58,6 +60,9 @@ class NeuralNetwork:
             "b3": tf.Variable(tf.truncated_normal([self.n_nodes_hl3])),
             "out": tf.Variable(tf.truncated_normal([self.output_layer_size])),
         }
+        self.network_flow = self.multilayer_perceptron(self.x, self.weights, self.biases)
+
+        self.load()
 
     def multilayer_perceptron(self, x, weights, biases):
         layer_1 = tf.add(tf.matmul(x, weights["h1"]), biases["b1"])
@@ -73,11 +78,10 @@ class NeuralNetwork:
         return out_layer
 
     def do_training(self):
-
         init = tf.global_variables_initializer()
-        y = self.multilayer_perceptron(self.x, self.weights, self.biases)
+        # self.network_structure = self.multilayer_perceptron(self.x, self.weights, self.biases)
 
-        cost_function = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=y, labels=self.y_))
+        cost_function = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.network_flow, labels=self.y_))
         optimizer = tf.train.GradientDescentOptimizer(self.learning_rate).minimize(cost_function)
 
         sess = tf.Session()
@@ -105,25 +109,23 @@ class NeuralNetwork:
         self.saver.save(sess, self.model_path)
 
     def classify(self, command):
-        init = tf.global_variables_initializer()
-        feed_forward_output = self.multilayer_perceptron(self.x, self.weights, self.biases)
+        array_prediction = tf.nn.softmax(self.network_flow, 1)
+        array_pred_run = self.session.run(array_prediction, feed_dict={self.x: command.reshape(1, self.input_layer_size)})
 
-        self.saver = tf.train.Saver()
-        sess = tf.Session()
-        sess.run(init)
-        self.saver.restore(sess, self.model_path)
-
-        # print(sess.run(feed_forward_output, feed_dict={self.x: command.reshape(1, self.input_layer_size)}))
-
-        array_prediction = tf.nn.softmax(feed_forward_output, 1)
-        array_pred_run = sess.run(array_prediction, feed_dict={self.x: command.reshape(1, self.input_layer_size)})
-
-        class_prediction = tf.argmax(feed_forward_output, 1)
-        class_pred_run = sess.run(class_prediction, feed_dict={self.x: command.reshape(1, self.input_layer_size)})
+        class_prediction = tf.argmax(self.network_flow, 1)
+        class_pred_run = self.session.run(class_prediction, feed_dict={self.x: command.reshape(1, self.input_layer_size)})
 
         # print("-> Predictions array: " + str(array_pred_run))
         # print("-> Prediction class: " + str(np.asscalar(class_pred_run)))
         return np.asscalar(class_pred_run)
+
+    def load(self):
+        init = tf.global_variables_initializer()
+
+        self.saver = tf.train.Saver()
+        self.session = tf.Session()
+        self.session.run(init)
+        self.saver.restore(self.session, self.model_path)
 
 if __name__ == '__main__':
     encoder = OneHotEncoder()
