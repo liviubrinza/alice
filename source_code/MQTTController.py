@@ -28,7 +28,7 @@ class MqttController:
     def subscribe_to_topics(self):
         self.mqtt_client.subscribe()
 
-    def on_msg_received(self, client, usedata, message):
+    def on_msg_received(self, client, userdata, message):
         msg = str(message.payload.decode("UTF-8"))
         topic = message.topic
 
