@@ -60,3 +60,6 @@ Also, the accuracy result was horrible
 - hooked up end to end dataflow from sentence input to classification output
 - first running version of the FFNN classifier using one hot encoding
 - removed old / unused files
+
+# 19 Nov 2018
+- added MQTT controller
