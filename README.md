@@ -63,3 +63,6 @@ Also, the accuracy result was horrible
 
 # 19 Nov 2018
 - added MQTT controller
+
+#20 Nov 2018
+- added Zwave controller
