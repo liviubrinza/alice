@@ -26,7 +26,7 @@ class MqttController:
         return False
 
     def subscribe_to_topics(self):
-        self.mqtt_client.subscribe()
+        self.mqtt_client.subscribe(self.INPUT_COMMAND_TOPIC)
 
     def on_msg_received(self, client, userdata, message):
         msg = str(message.payload.decode("UTF-8"))

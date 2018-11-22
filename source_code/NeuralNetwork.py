@@ -13,7 +13,7 @@ class NeuralNetwork:
     def __init__(self, encoder):
         self.saver = None
         self.encoder = encoder
-        self.model_path = "/mnt/28385DB3385D812C/GitBase/alice/source_code/trained_model/"
+        self.model_path = "trained_model/"
 
         training_corpus = self.encoder.training_corpus_list
 
