@@ -1,9 +1,9 @@
 import signal
 import sys
 
+from MQTTController import MqttController
 from NeuralNetwork import NeuralNetwork
 from OneHotEncoder import OneHotEncoder
-from MQTTController import MqttController
 
 encoder = OneHotEncoder()
 encoder.load_data()
@@ -37,7 +37,7 @@ def process_input_command(command):
     response = encoder.categories[category_no]
     # if there is any value in the command, append it
     if category_no == 3 or category_no == 4:
-        value = get_value(sentence)
+        value = get_value(command)
         if value:
             response += " by " + str(value)
     
