@@ -10,6 +10,22 @@ encoder.load_data()
 net = NeuralNetwork(encoder)
 mqttController = MqttController()
 
+mapping_dict = {
+    0 : "Hello there!",
+    1 : "Turning on the lights",
+    2 : "Turning the lights off",
+    3 : "Turning the heater up",
+    4 : "Turning the heater down"
+    }
+
+def get_alice_answer(command_category, value=None):
+    response = mapping_dict[command_category]
+    
+    if(value):
+        response += " by" + str(value) + " degrees"
+    
+    return response
+
 def graceful_shutdown():
     print("Closing A.L.I.C.E.")
     mqttController.shutdown()
@@ -39,7 +55,9 @@ def process_input_command(command):
     if category_no == 3 or category_no == 4:
         value = get_value(command)
         if value:
-            response += " by " + str(value)
+            response = get_alice_answer(category_no, value)
+        else:
+            response = get_alice_answer(category)
     
     mqttController.public_response_msg(response)
 
