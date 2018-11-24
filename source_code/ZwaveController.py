@@ -3,162 +3,94 @@ from openzwave.option import ZWaveOption
 from openzwave.network import ZWaveNetwork
 import time
 
-
 class ZWaveController:
+
+    DIMMER_LEVEL_VAL = 72057594076299265
+    COLOR_LEVEL_VAL  = 72057594084900899
     
     def __init__(self):
         print("Initializing zwave network controller")
         self.bulb_node = None
         self.door_sensor = None
-		
-        self.options = ZWaveOption(device='/dev/ttyACM0', config_path='/home/pi/.local/lib/python3.5/site-packages/python_openzwave/ozw_config/config', user_path='.', cmd_line='')
+
+        self.options = ZWaveOption(device='/dev/ttyACM0', config_path="/home/pi/.local/lib/python3.5/site-packages/python_openzwave/ozw_config", user_path='.')
+        self.options.set_log_file("ZwaveController_log.log")
         self.options.set_append_log_file(True)
-        self.options.set_console_output(True)
-        self.options.set_save_log_level('Warning')
+        self.options.set_console_output(False)
+        self.options.set_save_log_level('Debug')
         self.options.set_logging(True)
         self.options.lock()
-        print("INFO: Locked options")
-        self.network = ZWaveNetwork(self.options, log=None)
-        print("INFO: Created ZwaveNetwork")
-        print("Network state: " + str(self.network.state) + " stopped state: " + str(self.network.STATE_STOPPED))
 
-        if self.network.state >= self.network.STATE_STOPPED:
-            print("WARNING: Network was not stopped. Restarting now")
-            self.network.destroy()
-            time.sleep(5.0)
-		
-            self.network.start()
-            
-            #try for 10 seconds to wake the network up
-            for i in range(0, 20):
-                if self.network.state >= self.network.STATE_AWAKED:
-                    # network is awake, move on
-                    break
-                else:
-                    # network is still not awaken, let's wait a bit and then try again
-                    time.sleep(1.0)
-                
-            if self.network.state < self.network.STATE_AWAKED:
-                print("WARNING: COULD NOT WAKE UP THE ZWAVE NETWORK")
-                self.network.stop()
-                return
-            else:
-                print("Network awake")
-            
-            for i in range(0, 10):
-                if self.network.state >= self.network.STATE_READY:
-                    # network is ready for interacting
-                    break
-                else:
-                    # network not yet ready, wait a bit and then try again
-                    time.sleep(1.0)
-                
-            if not self.network.is_ready:
-                print("WARNING: NETWORK IS NOT READY FOR INTERACTING")
-                print("Current state is: %s" % self.network.state_str)
-            else:
-                print("Network Ready")
-            
-            print("Network:")
-            print(self.network.nodes)
-		
-            self.network.stop()
-		
+        print("Start network")
+        self.network = ZWaveNetwork(self.options, log=None)
+
+        delta = 0.5
+        for i in range(6):
+            time.sleep(1)
+            if self.network.state >= self.network.STATE_AWAKED:
+                break
+    
+        print("-------------------------------------------------------------------------------")
+        print("Network is awaked. Talk to controller.")
+        print("Nodes in network : {}".format(self.network.nodes_count))
+    
+        for i in range(6):
+            time.sleep(1)
+            if self.network.state == self.network.STATE_READY:
+                break
+    
+        if self.network.state == self.network.STATE_READY:
+            print("Network is ready. Get nodes")
+        elif self.network.state == self.network.STATE_AWAKED:
+            print("Network is awake. Some sleeping devices may miss. You can increase timeout to get them. But will continue.")
+        else:
+            print("Network is still starting. You MUST increase timeout. But will continue.")
+    
+       # for node in self.network.nodes:
+       #     print("------------------------------------------------------------")
+       #     print("{} - Name : {} ( Location : {} )".format(self.network.nodes[node].node_id, self.network.nodes[node].name, self.network.nodes[node].location))
+       #     print(" {} - Ready : {} / Awake : {} / Failed : {}".format(self.network.nodes[node].node_id, self.network.nodes[node].is_ready, self.network.nodes[node].is_awake, self.network.nodes[node].is_failed))
+       #     print(" {} - Manufacturer : {}  ( id : {} )".format(self.network.nodes[node].node_id, self.network.nodes[node].manufacturer_name, self.network.nodes[node].manufacturer_id))
+       #     print(" {} - Product : {} ( id  : {} / type : {} / Version : {})".format(self.network.nodes[node].node_id, self.network.nodes[node].product_name, self.network.nodes[node].product_id, self.network.nodes[node].product_type, self.network.nodes[node].version))
+       #     print(" {} - Command classes : {}".format(self.network.nodes[node].node_id, self.network.nodes[node].command_classes_as_string))
+       #     print(" {} - Capabilities : {}".format(self.network.nodes[node].node_id, self.network.nodes[node].capabilities))
+       #     print(" {} - Neighbors : {} / Power level : {}".format(self.network.nodes[node].node_id, self.network.nodes[node].neighbors, self.network.nodes[node].get_power_level()))
+       #     print(" {} - Is sleeping : {} / Can wake-up : {} / Battery level : {}".format(self.network.nodes[node].node_id, self.network.nodes[node].is_sleeping, self.network.nodes[node].can_wake_up(), self.network.nodes[node].get_battery_level()))
+
+        if self.network.setValueChangeCallbackFnc(self.on_zwave_value_change):
+                print("Callback successfully set")
+        else:
+                print("Callback not set correctly")
+        
+        self.bulb_node = self.network.nodes[2]
+        self.bulb_node.set_dimmer(self.DIMMER_LEVEL_VAL, 50)
+        print()
+        time.sleep(3)
+        print("DIMMER LEVEL: %s" % self.bulb_node.get_dimmer_level(self.DIMMER_LEVEL_VAL))
+        
+        self.bulb_node.set_rgbw(self.COLOR_LEVEL_VAL, "FF00000000")
+        #self.bulb_node.set_rgbw(self.COLOR_LEVEL_VAL, 10)
+        
+        time.sleep(3)
+        self.bulb_node.set_dimmer(self.DIMMER_LEVEL_VAL, 0)
+        print()
+        print()
+        #print(self.bulb_node.to_dict())
+
+    def on_zwave_value_change(self, args):
+        nodeId = args["nodeId"]
+        command_id = args["valueId"]["id"]
+        value = args["valueId"]["value"]
+        
+        print("Node id: %s" % nodeId)
+        print("Command id: %s" % command_id)
+        print("Value: %s" % value)
+
+    def shutdown_network(self):
+        print("Shutting down the ZWave network")
+        self.network.stop()
+
 if __name__ == "__main__":
     controller = ZWaveController()
-		
-##		self.bulb_node = self.network.nodes[2]
-##		self.door_sensor = self.network.nodes[3]
-##		self.multi_sensor = self.network.nodes[4]
-##		
-##		self.bulb_node.set_rgbw(self.__COLOR_VAL, self.__NORMAL_WHITE)
-##		self.bulb_node.set_dimmer(self.__DIMMER_LEVEL_VAL, 200)
-##		time.sleep(2.0)
-##		self.bulb_node.set_dimmer(self.__DIMMER_LEVEL_VAL, 0)
-##		
-##		self.network.set_poll_interval()
-##		
-##		# request to update the multisensor information
-##		self.triggerMultiUpdate()
-		
-##	def triggerMultiUpdate(self):
-##		self.multi_sensor.request_state()
-
-##	def setValueChangeCallbackFnc(self, aCallback):
-##		return self.network.setValueChangeCallbackFnc(aCallback)				
-##		
-##	def getBulbNodeId(self):
-##		return self.bulb_node.node_id
-##		
-##	def getDoorSensorNodeId(self):
-##		return self.door_sensor.node_id
-##		
-##	def getMultiSensorNodeId(self):
-##		return self.multi_sensor.node_id
-##
-##	def getMotionCommandId(self):
-##		return self.__MOTION_VAL
-##		
-##	def getLuminesenceCommandId(self):
-##		return self.__LUMINESENCE
-##		
-##	def getHumidityCommandId(self):
-##		return self.__HUMIDITY
-##		
-##	def getTemperatureCommandId(self):
-##		return self.__TEMPERATURE
-##		
-##	def getUvCommandId(self):
-##		return self.__ULTRAVIOLET
-##	
-##	def getDimmerCommandId(self):
-##		return self.__DIMMER_LEVEL_VAL
-##		
-##	
-##	def shutdownNetwork(self):
-##		print("Shutting down zwave network controller")
-##		self.network.stop()
-##
-##	def setBulbColor(self, aValue):
-##		if aValue == "cold":
-##			self.setColdWhite()
-##		elif aValue == "warm":
-##			self.setWarmWhite()
-##		else:
-##			self.bulb_node.set_rgbw(self.__COLOR_VAL, "#" + aValue + "0000")
-##
-##	def setWarmWhite(self):
-##		self.bulb_node.set_rgbw(self.__COLOR_VAL, self.__WARM_WHITE)
-##
-##	def setColdWhite(self):
-##		self.bulb_node.set_rgbw(self.__COLOR_VAL, self.__COLD_WHITE)
-##
-##	def setCurrentBulbColor(self):
-##		setBulbColor(self.currentColor)
-##
-##	def getCurrentColor(self):
-##		return self.currentColor
-##
-##	def setBulbDimmer(self, aValue):
-##		self.bulb_node.set_dimmer(self.__DIMMER_LEVEL_VAL, aValue)
-
-# TEST PART FOR THE SCRIPT #
-"""
-try:
-	z = ZWaveController()
-	## Get door sensor battery level ##
-#	sensor = z.network.nodes[3]
-#	print(str(sensor))
-#	time.sleep(2.0)
-#	print("Battery level : %s " % sensor.get_battery_level())
-
-	multi = z.network.nodes[4]
-	print(str(multi))
-
-	time.sleep(2.0)
-	z.shutdownNetwork()
-	time.sleep(2.0)
-except Exception as e:
-	print("ERROR: Exception caught in main app: %s" % str(e))
-	z.shutdownNetwork()
-"""
+    controller.shutdown_network()
+    print("Done")
