@@ -6,7 +6,7 @@ import time
 class ZWaveController:
 
     DIMMER_LEVEL_VAL = 72057594076299265
-    COLOR_LEVEL_VAL  = 72057594084900899
+    COLOR_LEVEL_VAL  = 72057594076512263
     
     def __init__(self):
         print("Initializing zwave network controller")
@@ -68,9 +68,15 @@ class ZWaveController:
         time.sleep(3)
         print("DIMMER LEVEL: %s" % self.bulb_node.get_dimmer_level(self.DIMMER_LEVEL_VAL))
         
-        self.bulb_node.set_rgbw(self.COLOR_LEVEL_VAL, "FF00000000")
-        #self.bulb_node.set_rgbw(self.COLOR_LEVEL_VAL, 10)
+        self.bulb_node.set_rgbw(self.COLOR_LEVEL_VAL, "#FFFFFFFFFF")
+        time.sleep(3)
+        self.bulb_node.set_rgbw(self.COLOR_LEVEL_VAL, "#FFFFFFFF00")
+        time.sleep(3)
+        self.bulb_node.set_rgbw(self.COLOR_LEVEL_VAL, "#FFFFFF00FF")
         
+        #self.bulb_node.set_rgbw(self.COLOR_LEVEL_VAL, 10)
+        print("COLOR VALUE: %s" % self.bulb_node.get_rgbw(self.COLOR_LEVEL_VAL)) 
+         
         time.sleep(3)
         self.bulb_node.set_dimmer(self.DIMMER_LEVEL_VAL, 0)
         print()
@@ -82,9 +88,11 @@ class ZWaveController:
         command_id = args["valueId"]["id"]
         value = args["valueId"]["value"]
         
+        print()
         print("Node id: %s" % nodeId)
         print("Command id: %s" % command_id)
         print("Value: %s" % value)
+        print()
 
     def shutdown_network(self):
         print("Shutting down the ZWave network")
