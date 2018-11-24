@@ -66,3 +66,6 @@ Also, the accuracy result was horrible
 
 #20 Nov 2018
 - added Zwave controller
+
+# 24 Nov 2018
+- implemented Zwave network handling
