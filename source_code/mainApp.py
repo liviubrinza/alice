@@ -86,7 +86,7 @@ def process_input_command(command):
 
 mqttController.set_command_callback(process_input_command)
 # set the callbacks between zwave and mqtt
-zwaveController.set_bulb_level_callback(mqttController.publish_light_levelnano)
+zwaveController.set_bulb_level_callback(mqttController.publish_light_level)
 zwaveController.set_bulb_color_callback(None)
 zwaveController.set_thermostat_level_callback(None)
 # set the zwave controller trigger methods
