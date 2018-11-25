@@ -55,16 +55,27 @@ def get_value(sentence):
 
 
 def handle_zwave_command(category, value):
-    if category_no == 0:
+    print("Handle " + str(category) + " and value " + str(value))
+    if category == 0:
         return
 
+    print(controller_dict[category])
+    
     if value:
-        controller_dict[category_no](value)
+        controller_dict[category](value)
     else:
-        if category_no == 1 or category_no == 2:
-            controller_dict[category_no](default_light_change_level)
-        if category_no == 3 or category_no == 4:
-            controller_dict[category_no](default_heat_change_level)
+        if category == 1:
+            controller_dict[category](default_light_change_level)
+            mqttController.publish_light_state("on")
+        if category == 2:
+            controller_dict[category](-default_light_change_level)
+            mqttController.publish_light_state("off")
+        if category == 3:
+            controller_dict[category](default_heat_change_level)
+            mqttController.publish_heater_state("on")
+        if category == 4:
+            controller_dict[category](-default_heat_change_level)
+            mqttController.publish_heater_state("off")
 
 def process_input_command(command):
     # encode the input command
@@ -84,7 +95,13 @@ def process_input_command(command):
 
     handle_zwave_command(category_no, value)
 
+def trigger_color_change(msg):
+    msg = msg.upper()
+    print("Color change received: " + str(msg))
+    zwaveController.set_bulb_color(msg)
+
 mqttController.set_command_callback(process_input_command)
+mqttController.set_color_change_callback(trigger_color_change)
 # set the callbacks between zwave and mqtt
 zwaveController.set_bulb_level_callback(mqttController.publish_light_level)
 zwaveController.set_bulb_color_callback(None)

@@ -80,8 +80,9 @@ class ZWaveController:
         self.bulb_node.set_dimmer(self.DIMMER_COMMAND_ID, level)
 
     def set_bulb_color(self, color):
+        color = "#" + color + "0000"
         print("[INFO] Setting bulb color to " + str(color))
-        self.bulb_node.set_rgbw(self.COLOR_COMMAND_ID, "#" + color + "0000")
+        self.bulb_node.set_rgbw(self.COLOR_COMMAND_ID, str(color))
 
     def set_thermostat_level(self, level):
         print("[INFO] Setting thermostat level to " + str(level))
@@ -109,6 +110,10 @@ class ZWaveController:
         nodeId = args["nodeId"]
         command_id = args["valueId"]["id"]
         value = args["valueId"]["value"]
+        
+        print("NODE ID: " + nodeId)
+        print("COMMAND ID: " + command_id)
+        print("VALUE: " + value)
 
         if nodeId == self.bulb_node.node_id:
             self.handle_bulb_change(command_id, value)

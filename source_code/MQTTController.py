@@ -8,6 +8,7 @@ class MqttController:
     OUTPUT_HEATER_STATE_TOPIC = "heaterState"
     OUTPUT_LIGHT_LEVEL_TOPIC = "lightLevel"
     OUTPUT_HEAT_LEVEL_TOPIC = "heatLevel"
+    COLOR_CHANGE_TOPIC = "colorChange"
 
     def __init__(self):
         self.mqtt_client = mqtt.Client("alice_client")
@@ -16,6 +17,7 @@ class MqttController:
         self.mqtt_client.loop_start()
 
         self.commandCallbackFnc = None
+        self.colorChangeCallbackFnc = None
 
         self.subscribe_to_topics()
         print("[INFO] Mqtt controller up and running")
@@ -27,9 +29,18 @@ class MqttController:
             return True
         print("[WARN]: Command callback function could not be set")
         return False
+        
+    def set_color_change_callback(self, aCallback):
+        if self.colorChangeCallbackFnc is None:
+            self.colorChangeCallbackFnc = aCallback
+            print("[INFO] Successfully set the color change callback function")
+            return True
+        print("[WARN] Color change callback function could not be set")
+        return False
 
     def subscribe_to_topics(self):
         self.mqtt_client.subscribe(self.INPUT_COMMAND_TOPIC)
+        self.mqtt_client.subscribe(self.COLOR_CHANGE_TOPIC)
 
     def on_msg_received(self, client, userdata, message):
         msg = str(message.payload.decode("UTF-8"))
@@ -37,6 +48,8 @@ class MqttController:
 
         if topic == self.INPUT_COMMAND_TOPIC and self.commandCallbackFnc:
             self.commandCallbackFnc(msg)
+        if topic == self.COLOR_CHANGE_TOPIC and self.colorChangeCallbackFnc:
+            self.colorChangeCallbackFnc(msg)
 
     def public_response_msg(self, message):
         self.mqtt_client.publish(self.OUTPUT_RESPONSE_TOPIC, message)
