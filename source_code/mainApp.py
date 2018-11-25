@@ -38,7 +38,7 @@ def get_alice_answer(command_category, value=None):
 def graceful_shutdown():
     print("Closing A.L.I.C.E.")
     mqttController.shutdown()
-    # zwaveController.shutdownConnection()
+    zwaveController.shutdownConnection()
     
 def signal_handler(signal, frame):
     graceful_shutdown()
@@ -119,15 +119,6 @@ try:
         sentence = input("Enter command:")
         if sentence == "quit":
             break
-        encoded_sentence = encoder.encode_sentence(sentence)
-        category_no = net.classify(encoded_sentence)
-
-        if category_no == 3 or category_no == 4:
-            value = get_value(sentence)
-            if value:
-                print("\tConverted command: " + encoder.categories[category_no] + " by " + str(value))
-                continue
-        print("\tConverted command: " + encoder.categories[category_no])
 except Exception as e:
     print("[ERROR]: Exception caught while in the main app: %s" % str(e))
     graceful_shutdown()
