@@ -12,7 +12,7 @@ net = NeuralNetwork(encoder)
 mqttController = MqttController()
 zwaveController = ZWaveController()
 
-mapping_dict = {
+response_dict = {
     0 : "Hello there!",
     1 : "Turning on the lights",
     2 : "Turning the lights off",
@@ -20,8 +20,15 @@ mapping_dict = {
     4 : "Turning the heater down"
     }
 
+controller_dict = {
+    0 : None
+}
+
+default_light_change_level = 50
+default_heat_change_level = 5
+
 def get_alice_answer(command_category, value=None):
-    response = mapping_dict[command_category]
+    response = response_dict[command_category]
     
     if(value):
         response += " by" + str(value) + " degrees"
@@ -46,6 +53,19 @@ def get_value(sentence):
             continue
     return None
 
+
+def handle_zwave_command(category, value):
+    if category_no == 0:
+        return
+
+    if value:
+        controller_dict[category_no](value)
+    else:
+        if category_no == 1 or category_no == 2:
+            controller_dict[category_no](default_light_change_level)
+        if category_no == 3 or category_no == 4:
+            controller_dict[category_no](default_heat_change_level)
+
 def process_input_command(command):
     # encode the input command
     encoded_sentence = encoder.encode_sentence(command)
@@ -58,15 +78,22 @@ def process_input_command(command):
     if category_no == 3 or category_no == 4:
         value = get_value(command)
 
+    # this for UI purposes
     response = get_alice_answer(category_no, value)
-
     mqttController.public_response_msg(response)
+
+    handle_zwave_command(category_no, value)
 
 mqttController.set_command_callback(process_input_command)
 # set the callbacks between zwave and mqtt
-zwaveController.set_bulb_level_callback(mqttController.publish_light_level())
+zwaveController.set_bulb_level_callback(mqttController.publish_light_levelnano)
 zwaveController.set_bulb_color_callback(None)
 zwaveController.set_thermostat_level_callback(None)
+# set the zwave controller trigger methods
+controller_dict[1] = zwaveController.set_bulb_level
+controller_dict[2] = zwaveController.set_bulb_level
+controller_dict[3] = zwaveController.set_thermostat_level
+controller_dict[4] = zwaveController.set_thermostat_level
 
 try:
     signal.signal(signal.SIGINT, signal_handler)

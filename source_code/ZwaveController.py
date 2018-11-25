@@ -1,4 +1,3 @@
-from openzwave.option import ZWaveOption
 import time
 
 from openzwave.network import ZWaveNetwork
@@ -77,12 +76,15 @@ class ZWaveController:
         #print(self.bulb_node.to_dict())
 
     def set_bulb_level(self, level):
+        print("[INFO] Setting bulb level to " + str(level))
         self.bulb_node.set_dimmer(self.DIMMER_COMMAND_ID, level)
 
     def set_bulb_color(self, color):
+        print("[INFO] Setting bulb color to " + str(color))
         self.bulb_node.set_rgbw(self.COLOR_COMMAND_ID, "#" + color + "0000")
 
     def set_thermostat_level(self, level):
+        print("[INFO] Setting thermostat level to " + str(level))
         pass
 
     def set_bulb_level_callback(self, callbackFnc):
