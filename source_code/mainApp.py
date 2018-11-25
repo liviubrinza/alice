@@ -4,11 +4,13 @@ import sys
 from MQTTController import MqttController
 from NeuralNetwork import NeuralNetwork
 from OneHotEncoder import OneHotEncoder
+from ZwaveController import ZWaveController
 
 encoder = OneHotEncoder()
 encoder.load_data()
 net = NeuralNetwork(encoder)
 mqttController = MqttController()
+zwaveController = ZWaveController()
 
 mapping_dict = {
     0 : "Hello there!",
@@ -51,21 +53,22 @@ def process_input_command(command):
     category_no = net.classify(encoded_sentence)
     # retrieve the command based on the prediction
     response = encoder.categories[category_no]
+    value = None
     # if there is any value in the command, append it
     if category_no == 3 or category_no == 4:
         value = get_value(command)
-        if value:
-            response = get_alice_answer(category_no, value)
-        else:
-            response = get_alice_answer(category)
-    
+
+    response = get_alice_answer(category_no, value)
+
     mqttController.public_response_msg(response)
 
 mqttController.set_command_callback(process_input_command)
-# net.do_training()
+# set the callbacks between zwave and mqtt
+zwaveController.set_bulb_level_callback(mqttController.publish_light_level())
+zwaveController.set_bulb_color_callback(None)
+zwaveController.set_thermostat_level_callback(None)
 
 try:
-
     signal.signal(signal.SIGINT, signal_handler)
 
     while True:

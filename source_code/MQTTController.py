@@ -18,11 +18,14 @@ class MqttController:
         self.commandCallbackFnc = None
 
         self.subscribe_to_topics()
+        print("[INFO] Mqtt controller up and running")
 
     def set_command_callback(self, aCallback):
         if self.commandCallbackFnc is None:
             self.commandCallbackFnc = aCallback
+            print("[INFO] Successfully set command callback function")
             return True
+        print("[WARN]: Command callback function could not be set")
         return False
 
     def subscribe_to_topics(self):

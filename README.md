@@ -69,3 +69,6 @@ Also, the accuracy result was horrible
 
 # 24 Nov 2018
 - implemented Zwave network handling
+
+#25 Nov 2018
+- fully connected components
