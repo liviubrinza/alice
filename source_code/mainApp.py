@@ -38,7 +38,7 @@ def get_alice_answer(command_category, value=None):
 def graceful_shutdown():
     print("Closing A.L.I.C.E.")
     mqttController.shutdown()
-    # zwaveController.shutdownConnection()
+    zwaveController.shutdown_network()
     
 def signal_handler(signal, frame):
     graceful_shutdown()
@@ -55,11 +55,8 @@ def get_value(sentence):
 
 
 def handle_zwave_command(category, value):
-    print("Handle " + str(category) + " and value " + str(value))
     if category == 0:
         return
-
-    print(controller_dict[category])
     
     if value:
         controller_dict[category](value)
@@ -97,7 +94,6 @@ def process_input_command(command):
 
 def trigger_color_change(msg):
     msg = msg.upper()
-    print("Color change received: " + str(msg))
     zwaveController.set_bulb_color(msg)
 
 mqttController.set_command_callback(process_input_command)
@@ -105,7 +101,7 @@ mqttController.set_color_change_callback(trigger_color_change)
 # set the callbacks between zwave and mqtt
 zwaveController.set_bulb_level_callback(mqttController.publish_light_level)
 zwaveController.set_bulb_color_callback(None)
-zwaveController.set_thermostat_level_callback(None)
+zwaveController.set_thermostat_level_callback(mqttController.publish_current_temperature)
 # set the zwave controller trigger methods
 controller_dict[1] = zwaveController.set_bulb_level
 controller_dict[2] = zwaveController.set_bulb_level

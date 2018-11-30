@@ -63,7 +63,7 @@ class MqttController:
     def publish_light_level(self, level):
         self.mqtt_client.publish(self.OUTPUT_LIGHT_LEVEL_TOPIC, level)
 
-    def publish_heat_level(self, leve):
+    def publish_current_temperature(self, level):
         self.mqtt_client.publish(self.OUTPUT_HEAT_LEVEL_TOPIC, level)
 
     def shutdown(self):
