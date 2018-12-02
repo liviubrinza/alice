@@ -19,6 +19,7 @@ class FileHandler:
     def read_training_corpus(self):
         """
         Reads the entire content of the file containing the initial training corpus
+
         :return: List containing all the lines of the file
         """
         return self.read_all_from_file(self.input_training_corpus)
@@ -26,6 +27,7 @@ class FileHandler:
     def write_refined_training_corpus(self, data):
         """
         Writes the list of refined training corpus to file
+
         :param data: the refined training corpus
         :return: None
         """
@@ -34,6 +36,7 @@ class FileHandler:
     def read_refined_training_corpus(self):
         """
         Reads the entire content of the file containing the refined training corpus
+
         :return: List containing all the lines of the file
         """
         return self.read_all_from_file(self.refined_training_corpus)
@@ -41,6 +44,7 @@ class FileHandler:
     def write_training_pickle(self, data):
         """
         Writes the input content into the training pickle file
+
         :param data: The data to be written into the pickle file
         :return: None
         """
@@ -49,6 +53,7 @@ class FileHandler:
     def write_lexicon_pickle(self, data):
         """
         Writes the input content into the lexicon pickle file
+
         :param data: The data to be written into the pickle file
         :return: None
         """
@@ -57,6 +62,7 @@ class FileHandler:
     def read_lexicon_pickle(self):
         """
         Returns the content of the lexicon pickle file
+
         :return: The content
         """
         return self.load_from_pickle(self.lexicon_pickle_file)
@@ -64,6 +70,7 @@ class FileHandler:
     def write_vocabulary_data_pickle(self, data):
         """
         Writes the input content into the vocabulary data pickle file
+
         :param data: The data to be written into the pickle file
         :return: None
         """
@@ -79,6 +86,7 @@ class FileHandler:
     def vocabulary_data_pickle_exists(self):
         """
         Checks whether the vocabulary data pickle file exists
+
         :return: True - the file exists
                  False - otherwise
         """
@@ -99,6 +107,7 @@ class FileHandler:
     def write_to_pickle(self, pickle_path, data):
         """
         Writes the content of tha data input, to a pickle specified by pickle_path
+
         :param pickle_path: the path to the output pickle
         :param data: the data to pe persisted in the pickle
         :return: None
@@ -136,6 +145,7 @@ class FileHandler:
     def file_exists(self, file_path):
         """
         Checks whether a file exists
+
         :param file_path: the file to check
         :return: True - the file exists
                  False - otherwise

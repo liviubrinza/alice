@@ -64,7 +64,7 @@ Also, the accuracy result was horrible
 # 19 Nov 2018
 - added MQTT controller
 
-#20 Nov 2018
+# 20 Nov 2018
 - added Zwave controller
 
 # 24 Nov 2018
@@ -75,3 +75,6 @@ Also, the accuracy result was horrible
 
 # 30 Nov 2018
 - integrated the thermostat
+
+# 2 Dec 2018
+- extended Node-RED and MQTT handling
