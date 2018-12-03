@@ -80,7 +80,7 @@ class MqttController:
         Subscribes to all the MQTT input topics
         """
         self.mqtt_client.subscribe(self.INPUT_COMMAND_TOPIC)
-        self.mqtt_client.subscribe(self.COLOR_CHANGE_TOPIC)
+        self.mqtt_client.subscribe(self.INPUT_COLOR_CHANGE_TOPIC)
         self.mqtt_client.subscribe(self.INPUT_CONFIGURATION_TOPIC)
 
     def on_msg_received(self, client, userdata, message):
@@ -97,7 +97,7 @@ class MqttController:
 
         if topic == self.INPUT_COMMAND_TOPIC and self.commandCallbackFnc:
             self.commandCallbackFnc(msg)
-        if topic == self.COLOR_CHANGE_TOPIC and self.colorChangeCallbackFnc:
+        if topic == self.INPUT_COLOR_CHANGE_TOPIC and self.colorChangeCallbackFnc:
             self.colorChangeCallbackFnc(msg)
         if topic == self.INPUT_CONFIGURATION_TOPIC and self.configurationCallbackFnc:
             self.configurationCallbackFnc(msg)
@@ -140,7 +140,7 @@ class MqttController:
 
         :param temperature: The current temperature read by the thermostat (in degrees Celsius)
         """
-        self.mqtt_client.publish(self.OUTPUT_HEAT_LEVEL_TOPIC, temperature)
+        self.mqtt_client.publish(self.OUTPUT_CURRENT_TEMP_TOPIC, temperature)
 
     def publish_set_temperature(self, temperature):
         """

@@ -71,6 +71,9 @@ def handle_zwave_command(category, value):
         if category == 4:
             controller_dict[category]()
             mqttController.publish_heater_state("off")
+            
+def change_configuration(value):
+    print("New configuration change received: ", str(value))
 
 def process_input_command(command):
     # encode the input command
