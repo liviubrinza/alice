@@ -24,8 +24,6 @@ controller_dict = {
     0 : None
 }
 
-default_light_change_level = 50
-default_heat_change_level = 5
 
 def get_alice_answer(command_category, value=None):
     response = response_dict[command_category]
@@ -62,16 +60,16 @@ def handle_zwave_command(category, value):
         controller_dict[category](value)
     else:
         if category == 1:
-            controller_dict[category](default_light_change_level)
+            controller_dict[category]()
             mqttController.publish_light_state("on")
         if category == 2:
-            controller_dict[category](-default_light_change_level)
+            controller_dict[category]()
             mqttController.publish_light_state("off")
         if category == 3:
-            controller_dict[category](default_heat_change_level)
+            controller_dict[category]()
             mqttController.publish_heater_state("on")
         if category == 4:
-            controller_dict[category](-default_heat_change_level)
+            controller_dict[category]()
             mqttController.publish_heater_state("off")
 
 def process_input_command(command):
@@ -88,7 +86,7 @@ def process_input_command(command):
 
     # this for UI purposes
     response = get_alice_answer(category_no, value)
-    mqttController.public_response_msg(response)
+    mqttController.publish_response_msg(response)
 
     handle_zwave_command(category_no, value)
 
@@ -96,17 +94,22 @@ def trigger_color_change(msg):
     msg = msg.upper()
     zwaveController.set_bulb_color(msg)
 
+# set the callbacks from mqtt
 mqttController.set_command_callback(process_input_command)
 mqttController.set_color_change_callback(trigger_color_change)
+mqttController.set_configuration_callback(change_configuration)
 # set the callbacks between zwave and mqtt
 zwaveController.set_bulb_level_callback(mqttController.publish_light_level)
 zwaveController.set_bulb_color_callback(None)
-zwaveController.set_thermostat_level_callback(mqttController.publish_current_temperature)
+zwaveController.set_thermostat_current_temp_change_callback(mqttController.publish_current_temperature)
+zwaveController.set_thermostat_set_temp_change_callback(mqttController.publish_set_temperature)
+zwaveController.set_thermostat_battery_change_callback(mqttController.publish_battery_level)
+
 # set the zwave controller trigger methods
-controller_dict[1] = zwaveController.set_bulb_level
-controller_dict[2] = zwaveController.set_bulb_level
-controller_dict[3] = zwaveController.set_thermostat_level
-controller_dict[4] = zwaveController.set_thermostat_level
+controller_dict[1] = zwaveController.increase_bulb_level
+controller_dict[2] = zwaveController.decrease_bulb_level
+controller_dict[3] = zwaveController.increase_thermostat_set_level
+controller_dict[4] = zwaveController.decrease_thermostat_set_level
 
 try:
     signal.signal(signal.SIGINT, signal_handler)

@@ -11,6 +11,8 @@ class ZWaveController:
     THERMOSTAT_BATTERY_ID = None
     CURRENT_TEMP_ID       = None
     SET_TEMP_ID           = None
+    DEFAULT_BULB_CHANGE_VALUE = 10
+    DEFAULT_TEMP_CHANGE_VALUE = 5
     
     def __init__(self):
         print("[INFO] Initializing zwave network controller")
@@ -29,7 +31,12 @@ class ZWaveController:
 
         self.bulb_level_change_callbackFnc = None
         self.bulb_color_change_callbackFnc = None
-        self.thermostat_level_change_callbackFnc = None
+        self.thermostat_current_temp_change_callbackFnc = None
+        self.thermostat_set_temp_change_callbackFnc = None
+        self.thermostat_battery_change_callbackFnc = None
+
+        self.current_bulb_level = 0
+        self.current_thermostat_level = 0
 
         for i in range(6):
             time.sleep(1)
@@ -92,6 +99,22 @@ class ZWaveController:
                 self.SET_TEMP_ID = value_dict["value_id"]
                 print("Found thermostat set temperature: ", self.SET_TEMP_ID)
 
+    def set_bulb_change_value(self, value):
+        if value and value != self.DEFAULT_BULB_CHANGE_VALUE:
+            self.DEFAULT_BULB_CHANGE_VALUE = value
+            print("[INFO] Set bulb change value to:", value)
+
+    def set_temp_change_value(self, value):
+        if value and value != self.DEFAULT_TEMP_CHANGE_VALUE:
+            self.DEFAULT_TEMP_CHANGE_VALUE = value
+            print("[INFO] Set temperature change value to:", value)
+
+    def increase_bulb_level(self, change = self.DEFAULT_BULB_CHANGE_VALUE):
+        self.set_bulb_level(self.current_bulb_level + change)
+
+    def decrease_bulb_level(self, change = self.DEFAULT_BULB_CHANGE_VALUE):
+        self.set_bulb_level(self.current_bulb_level - change)
+
     def set_bulb_level(self, level):
         print("[INFO] Setting bulb level to " + str(level))
         self.bulb_node.set_dimmer(self.DIMMER_COMMAND_ID, level)
@@ -107,34 +130,60 @@ class ZWaveController:
         except Exceptions as e:
                 print("Exception caught: %s" % str(e))
 
-    def set_thermostat_level(self, level):
-        print("[INFO] Setting thermostat level to " + str(level))
+    def increase_thermostat_set_level(self, change = self.DEFAULT_TEMP_CHANGE_VALUE):
+        new_value = self.current_thermostat_level + change
+        if new_value <= 100:
+            self.set_thermostat_set_level(new_value)
+
+    def decrease_thermostat_set_level(self, change = self.DEFAULT_TEMP_CHANGE_VALUE):
+        new_value = self.current_thermostat_level - change
+        if new_value >= 0:
+            self.set_thermostat_set_level(new_value)
+
+    def set_thermostat_set_level(self, level):
+        print("[INFO] Setting thermostat set level to " + str(level))
         pass
 
     def set_bulb_level_callback(self, callbackFnc):
-        self.bulb_level_change_callbackFnc = callbackFnc
+        if self.bulb_level_change_callbackFnc is None:
+            self.bulb_level_change_callbackFnc = callbackFnc
 
     def set_bulb_color_callback(self, callbackFnc):
-        self.bulb_color_change_callbackFnc = callbackFnc
+        if self.bulb_color_change_callbackFnc is None:
+            self.bulb_color_change_callbackFnc = callbackFnc
 
-    def set_thermostat_level_callback(self, callbackFnc):
-        self.thermostat_level_change_callbackFnc = callbackFnc
+    def set_thermostat_current_temp_change_callback(self, callbackFnc):
+        if self.thermostat_current_temp_change_callbackFnc is None:
+            self.thermostat_current_temp_change_callbackFnc = callbackFnc
+
+    def set_thermostat_set_temp_change_callback(self, callbackFnc):
+        if self.thermostat_set_temp_change_callbackFnc is None:
+            self.thermostat_set_temp_change_callbackFnc = callbackFnc
+
+    def set_thermostat_battery_change_callback(self, callbackFnc):
+        if self.thermostat_battery_change_callbackFnc is None:
+            self.thermostat_battery_change_callbackFnc = callbackFnc
 
     def handle_bulb_change(self, command_id, value):
-        if command_id == self.DIMMER_COMMAND_ID and self.bulb_level_change_callbackFnc is not None:
-            self.bulb_level_change_callbackFnc(value)
+        if command_id == self.DIMMER_COMMAND_ID:
+            self.current_bulb_level = value
+            if self.bulb_level_change_callbackFnc is not None:
+                self.bulb_level_change_callbackFnc(value)
+                print("Sent new bulb level to main")
         if command_id == self.COLOR_COMMAND_ID and self.bulb_color_change_callbackFnc is not None:
             self.bulb_color_change_callbackFnc(value)
 
     def handle_thermostat_change(self, command_id, value):
-        if command_id == self.CURRENT_TEMP_ID and self.thermostat_level_change_callbackFnc is not None:
-            self.thermostat_level_change_callbackFnc(value)
-            print("Sent new temp to main")
+        if command_id == self.CURRENT_TEMP_ID:
+            self.current_thermostat_level = value
+            if self.thermostat_current_temp_change_callbackFnc is not None:
+                self.thermostat_current_temp_change_callbackFnc(value)
+                print("Sent new temp to main")
         if command_id == self.THERMOSTAT_BATTERY_ID and self.thermostat_battery_change_callbackFnc is not None:
             self.thermostat_battery_change_callbackFnc(value)
             print("Sent new battery to main")
-        if command_id == self.SET_TEMP_ID and self.thermostat_set_level_change_callbackFnc is not None:
-            self.thermostat_set_level_change_callbackFnc(value)
+        if command_id == self.SET_TEMP_ID and self.thermostat_set_temp_change_callbackFnc is not None:
+            self.thermostat_set_temp_change_callbackFnc(value)
             print("Sent new set temp to main")
 
     def on_zwave_value_change(self, args):

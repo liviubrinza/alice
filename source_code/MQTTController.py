@@ -12,6 +12,7 @@ class MqttController:
     OUTPUT_SET_TEMP_TOPIC = "setTemperature"
     OUTPUT_CURRENT_TEMP_TOPIC = "currentTemperature"
     OUTPUT_LIGHT_LEVEL_TOPIC = "lightLevel"
+    OUTPUT_BATTERY_LEVEL_TOPIC = "batteryLevel"
 
     def __init__(self):
         """
@@ -143,11 +144,19 @@ class MqttController:
 
     def publish_set_temperature(self, temperature):
         """
-        Published the set temperature over the required MQTT topic
+        Publishes the set temperature over the required MQTT topic
 
         :param temperature: The set temperature set on the thermostat (in degrees Celsius)
         """
         self.mqtt_client.publish(self.OUTPUT_SET_TEMP_TOPIC, temperature)
+
+    def publish_battery_level(self, level):
+        """
+        Publishes the current thermostat battery status over the required MQTT topic
+
+        :param status: The current status (value) of the thermostat's battery level
+        """
+        self.mqtt_client.publish(self.OUTPUT_BATTERY_LEVEL_TOPIC, level)
 
     def shutdown(self):
         """
