@@ -37,6 +37,7 @@ class ZWaveController:
 
         self.current_bulb_level = 0
         self.current_thermostat_level = 0
+        self.set_thermostat_level = 0
 
         for i in range(6):
             time.sleep(1)
@@ -98,6 +99,9 @@ class ZWaveController:
             elif value_label == "Heating 1":
                 self.SET_TEMP_ID = value_dict["value_id"]
                 print("Found thermostat set temperature: ", self.SET_TEMP_ID)
+        
+        self.set_bulb_level(0)
+        self.set_thermostat_set_level(20)
 
     def set_bulb_change_value(self, value):
         if value and value != self.DEFAULT_BULB_CHANGE_VALUE:
@@ -110,10 +114,14 @@ class ZWaveController:
             print("[INFO] Set temperature change value to:", value)
 
     def increase_bulb_level(self, change = DEFAULT_BULB_CHANGE_VALUE):
-        self.set_bulb_level(self.current_bulb_level + change)
+        new_value = self.current_bulb_level + change
+        if new_value <= 100:
+            self.set_bulb_level(self.current_bulb_level + change)
 
     def decrease_bulb_level(self, change = DEFAULT_BULB_CHANGE_VALUE):
-        self.set_bulb_level(self.current_bulb_level - change)
+        new_value = self.current_bulb_level - change
+        if new_value >= 0:
+            self.set_bulb_level(self.current_bulb_level - change)
 
     def set_bulb_level(self, level):
         print("[INFO] Setting bulb level to " + str(level))
@@ -124,25 +132,27 @@ class ZWaveController:
         print("[INFO] Setting bulb color to " + str(color))
         #self.bulb_node.set_rgbw(self.COLOR_COMMAND_ID, str(color))
         try:
-                self.bulb_node.set_rgbw(self.COLOR_COMMAND_ID, "#FF00000000")
-                time.sleep(2)
-                print("COLOR VALUE: %s" % self.bulb_node.get_rgbw(self.COLOR_COMMAND_ID))
+            self.bulb_node.set_rgbw(self.COLOR_COMMAND_ID, "#FF00000000")
+            time.sleep(2)
+            print("COLOR VALUE: %s" % self.bulb_node.get_rgbw(self.COLOR_COMMAND_ID))
         except Exceptions as e:
-                print("Exception caught: %s" % str(e))
+            print("Exception caught: %s" % str(e))
 
     def increase_thermostat_set_level(self, change = DEFAULT_TEMP_CHANGE_VALUE):
-        new_value = self.current_thermostat_level + change
-        if new_value <= 100:
+        new_value = self.set_thermostat_level + float(change)
+        print("Increasing set level to:", new_value)
+        if new_value <= 30:
             self.set_thermostat_set_level(new_value)
 
     def decrease_thermostat_set_level(self, change = DEFAULT_TEMP_CHANGE_VALUE):
-        new_value = self.current_thermostat_level - change
-        if new_value >= 0:
+        new_value = self.set_thermostat_level - float(change)
+        print("Decreasing set level to:", new_value)
+        if new_value >= 15:
             self.set_thermostat_set_level(new_value)
 
     def set_thermostat_set_level(self, level):
         print("[INFO] Setting thermostat set level to " + str(level))
-        pass
+        self.thermostat_node.set_thermostat_heating(level)
 
     def set_bulb_level_callback(self, callbackFnc):
         if self.bulb_level_change_callbackFnc is None:
@@ -169,7 +179,6 @@ class ZWaveController:
             self.current_bulb_level = value
             if self.bulb_level_change_callbackFnc is not None:
                 self.bulb_level_change_callbackFnc(value)
-                print("Sent new bulb level to main")
         if command_id == self.COLOR_COMMAND_ID and self.bulb_color_change_callbackFnc is not None:
             self.bulb_color_change_callbackFnc(value)
 
@@ -178,15 +187,15 @@ class ZWaveController:
             self.current_thermostat_level = value
             if self.thermostat_current_temp_change_callbackFnc is not None:
                 self.thermostat_current_temp_change_callbackFnc(value)
-                print("Sent new temp to main")
-            else:
-                print("Thermostat current level callback not set")
+                print("Sent new current temp to main:", value)
         if command_id == self.THERMOSTAT_BATTERY_ID and self.thermostat_battery_change_callbackFnc is not None:
             self.thermostat_battery_change_callbackFnc(value)
-            print("Sent new battery to main")
-        if command_id == self.SET_TEMP_ID and self.thermostat_set_temp_change_callbackFnc is not None:
-            self.thermostat_set_temp_change_callbackFnc(value)
-            print("Sent new set temp to main")
+            print("Sent new battery to main:", value)
+        if command_id == self.SET_TEMP_ID:
+            self.set_thermostat_level = value
+            if self.thermostat_set_temp_change_callbackFnc is not None:
+                self.thermostat_set_temp_change_callbackFnc(value)
+                print("Sent new set temp to main:", value)
 
     def on_zwave_value_change(self, args):
         nodeId = args["nodeId"]
@@ -194,9 +203,9 @@ class ZWaveController:
         value = args["valueId"]["value"]
         
         print()
-        print("Node: %s" % args["nodeId"])
-        print("Command: %s" % args["valueId"]["id"])
-        print("Value: %s" % args["valueId"]["value"])
+        print("Node: %s" % nodeId)
+        print("Command: %s" % command_id)
+        print("Value: %s" % value)
         print()
 
         if nodeId == self.bulb_node.node_id:
