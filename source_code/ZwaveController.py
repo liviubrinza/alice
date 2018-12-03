@@ -104,30 +104,61 @@ class ZWaveController:
         self.set_thermostat_set_level(20)
 
     def set_bulb_change_value(self, value):
+        """
+        Sets the default value with which the light level is changed
+
+        :param value: The new value to be used
+        """
         if value and value != self.DEFAULT_BULB_CHANGE_VALUE:
             self.DEFAULT_BULB_CHANGE_VALUE = value
             print("[INFO] Set bulb change value to:", value)
 
     def set_temp_change_value(self, value):
+        """
+        Sets the default value with which the thermostat set temperature is changed
+
+        :param value: The new value to be used
+        """
         if value and value != self.DEFAULT_TEMP_CHANGE_VALUE:
             self.DEFAULT_TEMP_CHANGE_VALUE = value
             print("[INFO] Set temperature change value to:", value)
 
     def increase_bulb_level(self, change = DEFAULT_BULB_CHANGE_VALUE):
+        """
+        Increases the light bulbs brightness by the received value. If the value is not specified, then the default
+        light change value will be used.
+
+        :param change: the amount with which the the brightness should be increased
+        """
         new_value = self.current_bulb_level + change
         if new_value <= 100:
             self.set_bulb_level(self.current_bulb_level + change)
 
     def decrease_bulb_level(self, change = DEFAULT_BULB_CHANGE_VALUE):
+        """
+        Decreases the light bulbs brightness by the received value. If the value is not specified, then the default
+        light change value will be used.
+
+        :param change: the amount with which the the brightness should be decreased
+        """
         new_value = self.current_bulb_level - change
         if new_value >= 0:
             self.set_bulb_level(self.current_bulb_level - change)
 
     def set_bulb_level(self, level):
+        """
+        Sets the zwave light bulb node's brightness level to the given value
+        :param level: The value to be set
+        """
         print("[INFO] Setting bulb level to " + str(level))
         self.bulb_node.set_dimmer(self.DIMMER_COMMAND_ID, level)
 
     def set_bulb_color(self, color):
+        """
+        Sets the zwave light bulb node's RGB color to the given value.
+        Before setting the value, the required "#" prefix and "0000" white level value suffix is appended
+        :param color: The RGB color value to be set
+        """
         color = "#" + color + "0000"
         print("[INFO] Setting bulb color to " + str(color))
         #self.bulb_node.set_rgbw(self.COLOR_COMMAND_ID, str(color))
@@ -139,42 +170,85 @@ class ZWaveController:
             print("Exception caught: %s" % str(e))
 
     def increase_thermostat_set_level(self, change = DEFAULT_TEMP_CHANGE_VALUE):
+        """
+        Increases the thermostat's set temperature by the received value. If the value is not specified, then the
+        default temperature change value will be used.
+
+        :param change: The amount with which the set temperature should be increased
+        """
         new_value = self.set_thermostat_level + float(change)
         print("Increasing set level to:", new_value)
         if new_value <= 30:
             self.set_thermostat_set_level(new_value)
 
     def decrease_thermostat_set_level(self, change = DEFAULT_TEMP_CHANGE_VALUE):
+        """
+        Decreases the thermostat's set temperature by the received value. If the value is not specified, then the
+        default temperature change value will be used.
+
+        :param change: The amount with which the set temperature should be decreased
+        :return:
+        """
         new_value = self.set_thermostat_level - float(change)
         print("Decreasing set level to:", new_value)
         if new_value >= 15:
             self.set_thermostat_set_level(new_value)
 
     def set_thermostat_set_level(self, level):
+        """
+        Sets the zwave thermostat node's set temperature to the given value
+        :param level: The value to be set
+        """
         print("[INFO] Setting thermostat set level to " + str(level))
         self.thermostat_node.set_thermostat_heating(level)
 
     def set_bulb_level_callback(self, callbackFnc):
+        """
+        Sets the function to be called in case the light bulb light level changes, if it hasn't been already set
+        :param callbackFnc: The callback function to be set
+        """
         if self.bulb_level_change_callbackFnc is None:
             self.bulb_level_change_callbackFnc = callbackFnc
 
     def set_bulb_color_callback(self, callbackFnc):
+        """
+        Sets the function to be called in case the light bulb color changes, if it hasn't been already set
+        :param callbackFnc: The callback function to be set
+        """
         if self.bulb_color_change_callbackFnc is None:
             self.bulb_color_change_callbackFnc = callbackFnc
 
     def set_thermostat_current_temp_change_callback(self, callbackFnc):
+        """
+        Sets the function to be called in case the thermostat current temperature changes, if it hasn't been already set
+        :param callbackFnc: The callback function to be set
+        """
         if self.thermostat_current_temp_change_callbackFnc is None:
             self.thermostat_current_temp_change_callbackFnc = callbackFnc
 
     def set_thermostat_set_temp_change_callback(self, callbackFnc):
+        """
+        Sets the function to be called in case the thermostat set temperature changes, if it hasn't been already set
+        :param callbackFnc: The callback function to be set
+        """
         if self.thermostat_set_temp_change_callbackFnc is None:
             self.thermostat_set_temp_change_callbackFnc = callbackFnc
 
     def set_thermostat_battery_change_callback(self, callbackFnc):
+        """
+        Sets the function to be called in case the thermostat battery level changes, if it hasn't been already set
+        :param callbackFnc: The callback function to be set
+        """
         if self.thermostat_battery_change_callbackFnc is None:
             self.thermostat_battery_change_callbackFnc = callbackFnc
 
     def handle_bulb_change(self, command_id, value):
+        """
+        Handles all the network changes originating from the light bulb
+
+        :param command_id: The id of the command that changed
+        :param value: The new value of the changed command
+        """
         if command_id == self.DIMMER_COMMAND_ID:
             self.current_bulb_level = value
             if self.bulb_level_change_callbackFnc is not None:
@@ -183,6 +257,12 @@ class ZWaveController:
             self.bulb_color_change_callbackFnc(value)
 
     def handle_thermostat_change(self, command_id, value):
+        """
+        Handles all the network changes originating from the thermostat
+
+        :param command_id: The id of the command that changed
+        :param value: The new value of the changed command
+        """
         if command_id == self.CURRENT_TEMP_ID:
             self.current_thermostat_level = value
             if self.thermostat_current_temp_change_callbackFnc is not None:
@@ -198,6 +278,12 @@ class ZWaveController:
                 print("Sent new set temp to main:", value)
 
     def on_zwave_value_change(self, args):
+        """
+        Callback function set within the python-openzwave library to be called every time a value change occurs
+        on the network, regardless of the originating network node.
+
+        :param args: Contains all the zwave relevant pieces of information regarding the change that occurred
+        """
         nodeId = args["nodeId"]
         command_id = args["valueId"]["id"]
         value = args["valueId"]["value"]
@@ -216,6 +302,9 @@ class ZWaveController:
             return
 
     def shutdown_network(self):
+        """
+        Sets the light bulb's brightness to 0 and shuts down the zwave network
+        """
         print("Shutting down the ZWave network")
         self.set_bulb_level(0)
         self.network.stop()

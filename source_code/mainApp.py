@@ -1,3 +1,4 @@
+import json
 import signal
 import sys
 
@@ -74,6 +75,8 @@ def handle_zwave_command(category, value):
             
 def change_configuration(value):
     print("New configuration change received: ", str(value))
+    configuration_json = json.loads(value)
+    print(configuration_json)
 
 def process_input_command(command):
     # encode the input command
