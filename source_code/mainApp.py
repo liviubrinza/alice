@@ -110,6 +110,9 @@ zwaveController.set_thermostat_battery_change_callback(mqttController.publish_ba
 zwaveController.set_light_state_change_callback(mqttController.publish_light_state)
 zwaveController.set_heater_state_change_callback(mqttController.publish_heater_state)
 
+# send the initial configuration values over mqtt
+mqttController.publish_initial_config(zwaveController.get_configuration_values())
+
 # set the zwave controller trigger methods
 controller_dict[1] = zwaveController.increase_bulb_level
 controller_dict[2] = zwaveController.decrease_bulb_level

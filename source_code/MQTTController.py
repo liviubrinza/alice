@@ -1,4 +1,5 @@
 import paho.mqtt.client as mqtt
+import json
 
 class MqttController:
 
@@ -13,6 +14,7 @@ class MqttController:
     OUTPUT_CURRENT_TEMP_TOPIC = "currentTemperature"
     OUTPUT_LIGHT_LEVEL_TOPIC = "lightLevel"
     OUTPUT_BATTERY_LEVEL_TOPIC = "batteryLevel"
+    OUTPUT_INITIAL_CONFIG_TOPIC = "initialConfig"
 
     def __init__(self):
         """
@@ -157,6 +159,14 @@ class MqttController:
         :param status: The current status (value) of the thermostat's battery level
         """
         self.mqtt_client.publish(self.OUTPUT_BATTERY_LEVEL_TOPIC, level)
+        
+    def publish_initial_config(self, config):
+        """
+        Publishes the initial configuration values dictionary upon system startup
+        
+        :param config: The dictionary containing the initial configuration values
+        """
+        self.mqtt_client.publish(self.OUTPUT_INITIAL_CONFIG_TOPIC, json.dumps(config))
 
     def shutdown(self):
         """

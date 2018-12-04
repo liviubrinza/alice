@@ -40,7 +40,7 @@ class ZWaveController:
         self.set_thermostat_level = 0
         
         self.default_luminosity_variance = 10
-        self.default_heat_variance = 5
+        self.default_heat_variance = 2
         
         for i in range(6):
             time.sleep(1)
@@ -106,6 +106,19 @@ class ZWaveController:
         self.set_bulb_level(0)
         self.set_thermostat_set_level(20)
 
+    def get_configuration_values(self):
+        """
+        Returns a dictionary containing the following values: 
+        - current light level
+        - default light variance
+        - default heat variance
+        
+        :return: The dictionary containing the required values
+        """
+        return {"currentLightLevel" : self.current_bulb_level,
+                "defaultLightVariance" : self.default_luminosity_variance,
+                "defaultHeatVariance" : self.default_heat_variance}
+
     def set_bulb_change_value(self, value):
         """
         Sets the default value with which the light level is changed
@@ -135,8 +148,10 @@ class ZWaveController:
         """
         change = self.default_luminosity_variance if change is None else change
         new_value = self.current_bulb_level + change
-        if new_value <= 100:
-            self.set_bulb_level(self.current_bulb_level + change)
+        if new_value > 100:
+            new_value = 100
+                
+        self.set_bulb_level(new_value)
 
     def decrease_bulb_level(self, change = None):
         """
@@ -147,8 +162,10 @@ class ZWaveController:
         """
         change = self.default_luminosity_variance if change is None else change
         new_value = self.current_bulb_level - change
-        if new_value >= 0:
-            self.set_bulb_level(self.current_bulb_level - change)
+        if new_value < 0:
+            new_value = 0
+        
+        self.set_bulb_level(new_value)
 
     def set_bulb_level(self, level):
         """
@@ -183,9 +200,9 @@ class ZWaveController:
         """
         change = self.default_heat_variance if change is None else change
         new_value = self.set_thermostat_level + float(change)
-        print("Increasing set level to:", new_value)
-        if new_value <= 30:
-            self.set_thermostat_set_level(new_value)
+        if new_value > 30:
+            new_value = 30
+        self.set_thermostat_set_level(new_value)
 
     def decrease_thermostat_set_level(self, change = None):
         """
@@ -197,9 +214,9 @@ class ZWaveController:
         """
         change = self.default_heat_variance if change is None else change
         new_value = self.set_thermostat_level - float(change)
-        print("Decreasing set level to:", new_value)
-        if new_value >= 15:
-            self.set_thermostat_set_level(new_value)
+        if new_value < 15:
+            new_value = 15
+        self.set_thermostat_set_level(new_value)
 
     def set_thermostat_set_level(self, level):
         """

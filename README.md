@@ -78,3 +78,7 @@ Also, the accuracy result was horrible
 
 # 2 Dec 2018
 - extended Node-RED and MQTT handling
+
+# 4 Dec 2018
+- added initial configuration handling
+- added light and heat state triggers
