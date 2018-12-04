@@ -76,7 +76,14 @@ def handle_zwave_command(category, value):
 def change_configuration(value):
     print("New configuration change received: ", str(value))
     configuration_json = json.loads(value)
-    print(configuration_json)
+    new_config_sender = configuration_json['sender']
+    new_config_value = configuration_json['value']
+    if new_config_sender == 'lightLevel':
+        zwaveController.set_bulb_level(new_config_value)
+    elif new_config_sender == 'lightingStep':
+        zwaveController.set_bulb_change_value(new_config_value)
+    elif new_config_sender == 'heatingStep':
+        zwaveController.set_temp_change_value(new_config_value)
 
 def process_input_command(command):
     # encode the input command

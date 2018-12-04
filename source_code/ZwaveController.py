@@ -11,9 +11,7 @@ class ZWaveController:
     THERMOSTAT_BATTERY_ID = None
     CURRENT_TEMP_ID       = None
     SET_TEMP_ID           = None
-    DEFAULT_BULB_CHANGE_VALUE = 10
-    DEFAULT_TEMP_CHANGE_VALUE = 5
-    
+        
     def __init__(self):
         print("[INFO] Initializing zwave network controller")
         self.bulb_node = None
@@ -38,7 +36,10 @@ class ZWaveController:
         self.current_bulb_level = 0
         self.current_thermostat_level = 0
         self.set_thermostat_level = 0
-
+        
+        self.default_luminosity_variance = 10
+        self.default_heat_variance = 5
+        
         for i in range(6):
             time.sleep(1)
             if self.network.state >= self.network.STATE_AWAKED:
@@ -109,8 +110,8 @@ class ZWaveController:
 
         :param value: The new value to be used
         """
-        if value and value != self.DEFAULT_BULB_CHANGE_VALUE:
-            self.DEFAULT_BULB_CHANGE_VALUE = value
+        if value and value != self.default_luminosity_variance:
+            self.default_luminosity_variance = value
             print("[INFO] Set bulb change value to:", value)
 
     def set_temp_change_value(self, value):
@@ -119,28 +120,30 @@ class ZWaveController:
 
         :param value: The new value to be used
         """
-        if value and value != self.DEFAULT_TEMP_CHANGE_VALUE:
-            self.DEFAULT_TEMP_CHANGE_VALUE = value
+        if value and value != self.default_heat_variance:
+            self.default_heat_variance = value
             print("[INFO] Set temperature change value to:", value)
 
-    def increase_bulb_level(self, change = DEFAULT_BULB_CHANGE_VALUE):
+    def increase_bulb_level(self, change = None):
         """
         Increases the light bulbs brightness by the received value. If the value is not specified, then the default
         light change value will be used.
 
         :param change: the amount with which the the brightness should be increased
         """
+        change = self.default_luminosity_variance if change is None else change
         new_value = self.current_bulb_level + change
         if new_value <= 100:
             self.set_bulb_level(self.current_bulb_level + change)
 
-    def decrease_bulb_level(self, change = DEFAULT_BULB_CHANGE_VALUE):
+    def decrease_bulb_level(self, change = None):
         """
         Decreases the light bulbs brightness by the received value. If the value is not specified, then the default
         light change value will be used.
 
         :param change: the amount with which the the brightness should be decreased
         """
+        change = self.default_luminosity_variance if change is None else change
         new_value = self.current_bulb_level - change
         if new_value >= 0:
             self.set_bulb_level(self.current_bulb_level - change)
@@ -169,19 +172,20 @@ class ZWaveController:
         except Exceptions as e:
             print("Exception caught: %s" % str(e))
 
-    def increase_thermostat_set_level(self, change = DEFAULT_TEMP_CHANGE_VALUE):
+    def increase_thermostat_set_level(self, change = None):
         """
         Increases the thermostat's set temperature by the received value. If the value is not specified, then the
         default temperature change value will be used.
 
         :param change: The amount with which the set temperature should be increased
         """
+        change = self.default_heat_variance if change is None else change
         new_value = self.set_thermostat_level + float(change)
         print("Increasing set level to:", new_value)
         if new_value <= 30:
             self.set_thermostat_set_level(new_value)
 
-    def decrease_thermostat_set_level(self, change = DEFAULT_TEMP_CHANGE_VALUE):
+    def decrease_thermostat_set_level(self, change = None):
         """
         Decreases the thermostat's set temperature by the received value. If the value is not specified, then the
         default temperature change value will be used.
@@ -189,6 +193,7 @@ class ZWaveController:
         :param change: The amount with which the set temperature should be decreased
         :return:
         """
+        change = self.default_heat_variance if change is None else change
         new_value = self.set_thermostat_level - float(change)
         print("Decreasing set level to:", new_value)
         if new_value >= 15:
