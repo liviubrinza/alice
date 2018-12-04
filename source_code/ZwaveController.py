@@ -32,6 +32,8 @@ class ZWaveController:
         self.thermostat_current_temp_change_callbackFnc = None
         self.thermostat_set_temp_change_callbackFnc = None
         self.thermostat_battery_change_callbackFnc = None
+        self.light_state_change_callbackFnc = None
+        self.heater_state_change_callbackFnc = None
 
         self.current_bulb_level = 0
         self.current_thermostat_level = 0
@@ -202,6 +204,7 @@ class ZWaveController:
     def set_thermostat_set_level(self, level):
         """
         Sets the zwave thermostat node's set temperature to the given value
+
         :param level: The value to be set
         """
         print("[INFO] Setting thermostat set level to " + str(level))
@@ -210,6 +213,7 @@ class ZWaveController:
     def set_bulb_level_callback(self, callbackFnc):
         """
         Sets the function to be called in case the light bulb light level changes, if it hasn't been already set
+
         :param callbackFnc: The callback function to be set
         """
         if self.bulb_level_change_callbackFnc is None:
@@ -218,14 +222,26 @@ class ZWaveController:
     def set_bulb_color_callback(self, callbackFnc):
         """
         Sets the function to be called in case the light bulb color changes, if it hasn't been already set
+
         :param callbackFnc: The callback function to be set
         """
         if self.bulb_color_change_callbackFnc is None:
             self.bulb_color_change_callbackFnc = callbackFnc
 
+    def set_light_state_change_callback(self, aCallbackFnc):
+        """
+        Sets the function to be called in case the light changes its current state(of -> off, off -> on), if it hasn't
+        already been set
+
+        :param aCallbackFnc: The callback function to be set
+        """
+        if self.light_state_change_callbackFnc is None:
+            self.light_state_change_callbackFnc = aCallbackFnc
+
     def set_thermostat_current_temp_change_callback(self, callbackFnc):
         """
         Sets the function to be called in case the thermostat current temperature changes, if it hasn't been already set
+
         :param callbackFnc: The callback function to be set
         """
         if self.thermostat_current_temp_change_callbackFnc is None:
@@ -234,6 +250,7 @@ class ZWaveController:
     def set_thermostat_set_temp_change_callback(self, callbackFnc):
         """
         Sets the function to be called in case the thermostat set temperature changes, if it hasn't been already set
+
         :param callbackFnc: The callback function to be set
         """
         if self.thermostat_set_temp_change_callbackFnc is None:
@@ -242,10 +259,21 @@ class ZWaveController:
     def set_thermostat_battery_change_callback(self, callbackFnc):
         """
         Sets the function to be called in case the thermostat battery level changes, if it hasn't been already set
+
         :param callbackFnc: The callback function to be set
         """
         if self.thermostat_battery_change_callbackFnc is None:
             self.thermostat_battery_change_callbackFnc = callbackFnc
+
+    def set_heater_state_change_callback(self, aCallbackFnc):
+        """
+        Sets the callback function to be called in case the heater changes its current state (on -> off, off -> on),
+        if it hasn't already been set
+
+        :param aCallbackFnc: The callback function to be set
+        """
+        if self.heater_state_change_callbackFnc is None:
+            self.heater_state_change_callbackFnc = aCallbackFnc
 
     def handle_bulb_change(self, command_id, value):
         """
@@ -258,6 +286,7 @@ class ZWaveController:
             self.current_bulb_level = value
             if self.bulb_level_change_callbackFnc is not None:
                 self.bulb_level_change_callbackFnc(value)
+                self.light_state_change_callbackFnc("on" if value > 0 else "off")
         if command_id == self.COLOR_COMMAND_ID and self.bulb_color_change_callbackFnc is not None:
             self.bulb_color_change_callbackFnc(value)
 
@@ -272,15 +301,16 @@ class ZWaveController:
             self.current_thermostat_level = value
             if self.thermostat_current_temp_change_callbackFnc is not None:
                 self.thermostat_current_temp_change_callbackFnc(value)
-                print("Sent new current temp to main:", value)
+                self.heater_state_change_callbackFnc(
+                    "on" if self.current_thermostat_level < self.set_thermostat_level else "off")
         if command_id == self.THERMOSTAT_BATTERY_ID and self.thermostat_battery_change_callbackFnc is not None:
             self.thermostat_battery_change_callbackFnc(value)
-            print("Sent new battery to main:", value)
         if command_id == self.SET_TEMP_ID:
             self.set_thermostat_level = value
             if self.thermostat_set_temp_change_callbackFnc is not None:
                 self.thermostat_set_temp_change_callbackFnc(value)
-                print("Sent new set temp to main:", value)
+                self.heater_state_change_callbackFnc(
+                    "on" if self.current_thermostat_level < self.set_thermostat_level else "off")
 
     def on_zwave_value_change(self, args):
         """

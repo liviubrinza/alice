@@ -60,19 +60,9 @@ def handle_zwave_command(category, value):
     if value:
         controller_dict[category](value)
     else:
-        if category == 1:
-            controller_dict[category]()
-            mqttController.publish_light_state("on")
-        if category == 2:
-            controller_dict[category]()
-            mqttController.publish_light_state("off")
-        if category == 3:
-            controller_dict[category]()
-            mqttController.publish_heater_state("on")
-        if category == 4:
-            controller_dict[category]()
-            mqttController.publish_heater_state("off")
-            
+        controller_dict[category]()
+
+
 def change_configuration(value):
     print("New configuration change received: ", str(value))
     configuration_json = json.loads(value)
@@ -117,6 +107,8 @@ zwaveController.set_bulb_color_callback(None)
 zwaveController.set_thermostat_current_temp_change_callback(mqttController.publish_current_temperature)
 zwaveController.set_thermostat_set_temp_change_callback(mqttController.publish_set_temperature)
 zwaveController.set_thermostat_battery_change_callback(mqttController.publish_battery_level)
+zwaveController.set_light_state_change_callback(mqttController.publish_light_state)
+zwaveController.set_heater_state_change_callback(mqttController.publish_heater_state)
 
 # set the zwave controller trigger methods
 controller_dict[1] = zwaveController.increase_bulb_level
