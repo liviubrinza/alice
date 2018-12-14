@@ -1,0 +1,2 @@
+model_checkpoint_path: "/mnt/28385DB3385D812C/GitBase/alice/source_code/trained_model/"
+all_model_checkpoint_paths: "/mnt/28385DB3385D812C/GitBase/alice/source_code/trained_model/"

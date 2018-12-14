@@ -82,3 +82,6 @@ Also, the accuracy result was horrible
 # 4 Dec 2018
 - added initial configuration handling
 - added light and heat state triggers
+
+# 14 Dec 2018
+- added confidence percentage for category guesses

@@ -5,6 +5,7 @@ import random
 import numpy as np
 import tensorflow as tf
 from OneHotEncoder import OneHotEncoder
+from FileHandler import FileHandler
 
 # https://www.youtube.com/watch?v=yX8KuPZCAMo
 
@@ -14,6 +15,7 @@ class NeuralNetwork:
         self.saver = None
         self.encoder = encoder
         self.model_path = "trained_model/"
+        self.imprecision_threshold = 0.8
 
         training_corpus = self.encoder.training_corpus_list
 
@@ -108,16 +110,36 @@ class NeuralNetwork:
         self.saver = tf.train.Saver()
         self.saver.save(sess, self.model_path)
 
+    def get_prediction_percentages(self, numpy_array):
+        clamped_values = list()
+        normalized_values = list()
+
+        values_list = numpy_array.tolist()[0]
+
+        [clamped_values.append(round(value, 2)) for value in values_list]
+
+        max_val = max(clamped_values)
+        min_val = min(clamped_values)
+
+        for value in clamped_values:
+            normalized = (value - min_val) / (max_val - min_val)
+            normalized_values.append(round(normalized, 2))
+
+        return normalized_values
+
     def classify(self, command):
-        array_prediction = tf.nn.softmax(self.network_flow, 1)
-        array_pred_run = self.session.run(array_prediction, feed_dict={self.x: command.reshape(1, self.input_layer_size)})
+        values_prediction = self.network_flow
+        values_pred_run = self.session.run(values_prediction, feed_dict={self.x: command.reshape(1, self.input_layer_size)})
+        #print("-> Bare predictions array: " + str(values_pred_run))
 
-        class_prediction = tf.argmax(self.network_flow, 1)
-        class_pred_run = self.session.run(class_prediction, feed_dict={self.x: command.reshape(1, self.input_layer_size)})
+        guesses = self.get_prediction_percentages(values_pred_run)
+        #print(guesses)
 
-        # print("-> Predictions array: " + str(array_pred_run))
-        # print("-> Prediction class: " + str(np.asscalar(class_pred_run)))
-        return np.asscalar(class_pred_run)
+        for guess in guesses:
+            if guess > self.imprecision_threshold and guess != 1.0:
+                return -1, guesses
+
+        return guesses.index(1.0), guesses
 
     def load(self):
         init = tf.global_variables_initializer()
@@ -127,15 +149,69 @@ class NeuralNetwork:
         self.session.run(init)
         self.saver.restore(self.session, self.model_path)
 
+    def get_training_corpus_list(self):
+        file_handler = FileHandler()
+        training_corpus = file_handler.read_training_corpus()
+
+        entries_list = list()
+
+        for entry in training_corpus:
+            entry = entry.strip()
+            if entry == "":
+                continue
+            entry_dict = {"class": entry.split(":")[0].strip(),
+                          "sentence": entry.split(":")[1].strip()}
+            entries_list.append(entry_dict)
+
+        return entries_list
+
+    def test_accuracy(self):
+        test_list = self.get_training_corpus_list()
+
+        entries_count = len(test_list)
+        correct_guesses = 0
+        incorrect_guesses = 0
+        misclassified_sentences = list()
+
+        for entry in test_list:
+            encoded_sentence = self.encoder.encode_sentence(entry["sentence"])
+            guess, guesses = self.classify(encoded_sentence)
+
+            guess_category = self.encoder.categories[guess]
+
+            if guess_category == entry["class"]:
+                correct_guesses += 1
+            else:
+                incorrect_guesses += 1
+                misclassified_sentences.append([entry["sentence"], guesses])
+
+        print("Accuracy:", round(((correct_guesses * 100) / entries_count), 2))
+        print("Total tested:", entries_count)
+        print("Correct guesses:", correct_guesses)
+        print("Incorrect guesses:", incorrect_guesses)
+        print()
+        print("Misclassified sentences:")
+
+        for count in range(0, incorrect_guesses):
+            print("%s. %s." % (count, misclassified_sentences[count][0]))
+            print("\tGuessed: %s", misclassified_sentences[count][1])
+
 if __name__ == '__main__':
     encoder = OneHotEncoder()
     encoder.load_data()
     net = NeuralNetwork(encoder)
+    """ training """
     # net.do_training()
 
-    sentence = encoder.encode_sentence("Turn on the light")
-    print(encoder.categories[net.classify(sentence)])
-    sentence = encoder.encode_sentence("hello there")
-    print(encoder.categories[net.classify(sentence)])
-    sentence = encoder.encode_sentence("make it warmer")
-    print(encoder.categories[net.classify(sentence)])
+    """ testing """
+    # sentence = encoder.encode_sentence("hello alice")
+    # print(net.classify(sentence))
+    # sentence = encoder.encode_sentence("Turn on the light")
+    # print(net.classify(sentence))
+    # sentence = encoder.encode_sentence("hello there")
+    # print(net.classify(sentence))
+    # sentence = encoder.encode_sentence("make it warmer")
+    # print(net.classify(sentence))
+
+    """ test accuracy """
+    # net.test_accuracy()
