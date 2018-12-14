@@ -1,4 +1,4 @@
-# A.L.I.C.E. (Automation of locally integrated control equipment)
+# Automation of locally integrated control equipment (A.L.I.C.E.)
 home automation A.I. project
 
 History
