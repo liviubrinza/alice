@@ -1,4 +1,5 @@
 import json
+import random
 import signal
 import sys
 
@@ -6,6 +7,7 @@ from MQTTController import MqttController
 from NeuralNetwork import NeuralNetwork
 from OneHotEncoder import OneHotEncoder
 from ZwaveController import ZWaveController
+from constants import responses
 
 encoder = OneHotEncoder()
 encoder.load_data()
@@ -13,38 +15,43 @@ net = NeuralNetwork(encoder)
 mqttController = MqttController()
 zwaveController = ZWaveController()
 
-response_dict = {
-    0 : "Hello there!",
-    1 : "Turning on the lights",
-    2 : "Turning the lights off",
-    3 : "Turning the heater up",
-    4 : "Turning the heater down"
-    }
-
 controller_dict = {
-    0 : None
+    0 : None,
+    1 : zwaveController.increase_bulb_level,
+    2 : zwaveController.decrease_bulb_level,
+    3 : zwaveController.increase_thermostat_set_level,
+    4 : zwaveController.decrease_thermostat_set_level
 }
 
-
-def get_alice_answer(command_category, value=None):
-    response = response_dict[command_category]
-    
-    if(value):
-        response += " by" + str(value) + " degrees"
-    
-    return response
-
+"""========== System shutdown =========="""
 def graceful_shutdown():
     print("Closing A.L.I.C.E.")
     mqttController.shutdown()
     zwaveController.shutdown_network()
-    
+
+
 def signal_handler(signal, frame):
     graceful_shutdown()
     sys.exit(0)
+"""====================================="""
 
-def get_value(sentence):
-    words = sentence.split()
+def get_alice_answer(command_category, value=None):
+    response = random.choice(responses[command_category])
+    response_suffix = ""
+
+    if value:
+        # light related change
+        if command_category == 1 or command_category == 2:
+            response_suffix = "by" + str(value) + " percent"
+        if command_category == 3 or command_category == 4:
+            response_suffix = "by" + str(value) + " degrees"
+
+        response += response_suffix
+    
+    return response
+
+def get_value_from_command(command):
+    words = command.split()
     for word in words:
         try:
             return int(word)
@@ -52,16 +59,23 @@ def get_value(sentence):
             continue
     return None
 
-
 def handle_zwave_command(category, value):
-    if category == 0:
+    if category == -1 or category == 0:
         return
-    
-    if value:
-        controller_dict[category](value)
-    else:
-        controller_dict[category]()
+    controller_dict[category](value)
 
+def process_input_command(command):
+    # encode the input command
+    encoded_sentence = encoder.encode_sentence(command)
+    # retrieve the prediction from the neural network
+    category_no = net.classify(encoded_sentence)
+    # if there is any value in the command, append it
+    value = get_value_from_command(command)
+    # this for UI purposes
+    response = get_alice_answer(category_no, value)
+    mqttController.publish_response_msg(response)
+
+    handle_zwave_command(category_no, value)
 
 def change_configuration(value):
     print("New configuration change received: ", str(value))
@@ -75,24 +89,7 @@ def change_configuration(value):
     elif new_config_sender == 'heatingStep':
         zwaveController.set_temp_change_value(new_config_value)
 
-def process_input_command(command):
-    # encode the input command
-    encoded_sentence = encoder.encode_sentence(command)
-    # retrieve the prediction from the neural network
-    category_no = net.classify(encoded_sentence)
-    # retrieve the command based on the prediction
-    response = encoder.categories[category_no]
-    value = None
-    # if there is any value in the command, append it
-    if category_no == 3 or category_no == 4:
-        value = get_value(command)
-
-    # this for UI purposes
-    response = get_alice_answer(category_no, value)
-    mqttController.publish_response_msg(response)
-
-    handle_zwave_command(category_no, value)
-
+# TODO: CHECK WHETHER THIS WILL WORK
 def trigger_color_change(msg):
     msg = msg.upper()
     zwaveController.set_bulb_color(msg)
@@ -112,12 +109,6 @@ zwaveController.set_heater_state_change_callback(mqttController.publish_heater_s
 
 # send the initial configuration values over mqtt
 mqttController.publish_initial_config(zwaveController.get_configuration_values())
-
-# set the zwave controller trigger methods
-controller_dict[1] = zwaveController.increase_bulb_level
-controller_dict[2] = zwaveController.decrease_bulb_level
-controller_dict[3] = zwaveController.increase_thermostat_set_level
-controller_dict[4] = zwaveController.decrease_thermostat_set_level
 
 try:
     signal.signal(signal.SIGINT, signal_handler)

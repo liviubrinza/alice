@@ -5,7 +5,6 @@ import random
 import numpy as np
 import tensorflow as tf
 from OneHotEncoder import OneHotEncoder
-from FileHandler import FileHandler
 
 # https://www.youtube.com/watch?v=yX8KuPZCAMo
 
@@ -214,4 +213,4 @@ if __name__ == '__main__':
     # print(net.classify(sentence))
 
     """ test accuracy """
-    # net.test_accuracy()
+    net.test_accuracy()
