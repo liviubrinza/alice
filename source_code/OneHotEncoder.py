@@ -1,6 +1,8 @@
 import numpy as np
-from FileHandler import FileHandler
 from nltk.stem import SnowballStemmer
+
+from FileHandler import FileHandler
+
 
 class OneHotEncoder:
     # the modal verbs we will omit
@@ -145,4 +147,4 @@ class OneHotEncoder:
 if __name__ == '__main__':
     encoder = OneHotEncoder()
     encoder.load_data()
-    print(encoder.encode_sentence("Please turn on the light"))
+    print(encoder.encode_sentence("hello"))

@@ -68,7 +68,7 @@ def process_input_command(command):
     # encode the input command
     encoded_sentence = encoder.encode_sentence(command)
     # retrieve the prediction from the neural network
-    category_no = net.classify(encoded_sentence)
+    category_no, guess_list = net.classify(encoded_sentence)
     # if there is any value in the command, append it
     value = get_value_from_command(command)
     # this for UI purposes

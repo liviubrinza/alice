@@ -1,0 +1,24 @@
+Accuracy: 92.24
+Total tested: 116
+Correct guesses: 107
+Incorrect guesses: 9
+
+Misclassified sentences:
+0. let there be light.
+	Guessed: %s [0.48, 0.53, 1.0, 0.0, 0.36]
+1. turn down the light.
+	Guessed: %s [0.17, 1.0, 0.68, 0.1, 0.0]
+2. make it dark.
+	Guessed: %s [0.0, 0.04, 0.73, 1.0, 0.48]
+3. could you please make it hotter.
+	Guessed: %s [0.0, 0.93, 0.74, 1.0, 0.86]
+4. make it hotter please.
+	Guessed: %s [0.0, 0.41, 0.4, 1.0, 0.89]
+5. increase temperature.
+	Guessed: %s [0.0, 1.0, 0.35, 0.22, 0.23]
+6. it's freezing.
+	Guessed: %s [0.0, 0.25, 0.41, 1.0, 0.88]
+7. warm me up.
+	Guessed: %s [1.0, 0.53, 0.86, 0.92, 0.0]
+8. increase heat.
+	Guessed: %s [0.11, 0.71, 1.0, 0.53, 0.0]

@@ -1,0 +1,95 @@
+greeting : greet
+greeting : hello
+greeting : hello there
+greeting : hi
+greeting : hi there
+greeting : hello alic
+greeting : hi alic
+greeting : hey there alic
+greeting : hello there alic
+greeting : alic
+greeting : good morn
+greeting : good day
+greeting : good afternoon
+greeting : good even
+greeting : good night
+greeting : what up
+greeting : hey
+greeting : howdi
+lights on : turn on light
+lights on : you turn light on
+lights on : you turn on light
+lights on : turn light on
+lights on : it dark in here
+lights on : make it brighter
+lights on : i can't see
+lights on : i want to see
+lights on : i need to see
+lights on : i need light
+lights on : light on
+lights on : switch on light
+lights on : switch light on
+lights on : you switch light on
+lights on : let there be light
+lights on : illumin
+lights on : turn up light
+lights off : turn off light
+lights off : you turn light off
+lights off : turn light off
+lights off : it too bright in here
+lights off : there is too much light
+lights off : make it darker
+lights off : light off
+lights off : switch off light
+lights off : switch light off
+lights off : you switch light off
+lights off : delumin
+lights off : you turn off light
+lights off : turn down light
+lights off : dim light
+lights off : dim room
+lights off : make it dark
+lights off : make dark
+heat up : make it warmer
+heat up : it cold
+heat up : it too cold in here
+heat up : it too cold
+heat up : i am freez
+heat up : you make it warmer
+heat up : make it warmer in here
+heat up : you make it hotter
+heat up : make it hotter
+heat up : turn up heat
+heat up : heat up
+heat up : i am cold
+heat up : it chilli
+heat up : switch on heat
+heat up : i'm so cold
+heat up : i'm cold
+heat up : me so cold
+heat up : me is cold
+heat up : increas temperatur
+heat up : rais temperatur
+heat up : it freez
+heat up : it freez in here
+heat up : it cold in here
+heat up : warm me up
+heat up : increas heat
+heat down : make it colder
+heat down : make it cooler
+heat down : it hot
+heat down : it warm
+heat down : it too hot
+heat down : it too warm
+heat down : it too warm in here
+heat down : it too hot in here
+heat down : you make it cooler
+heat down : you make it colder
+heat down : heat down
+heat down : turn down heat
+heat down : me so hot
+heat down : it get hot in here
+heat down : it get warm in here
+heat down : decreas temperatur
+heat down : decreas heat
+heat down : lower temperatur

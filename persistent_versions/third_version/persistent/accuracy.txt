@@ -1,0 +1,22 @@
+Accuracy: 93.1
+Total tested: 116
+Correct guesses: 108
+Incorrect guesses: 8
+
+Misclassified sentences:
+0. make it brighter.
+	Guessed: %s [0.0, 1.0, 0.75, 0.95, 0.58]
+1. could you switch the lights off.
+	Guessed: %s [0.09, 0.86, 1.0, 0.0, 0.08]
+2. would you switch the lights off.
+	Guessed: %s [0.09, 0.86, 1.0, 0.0, 0.08]
+3. dim the lights.
+	Guessed: %s [0.5, 0.92, 1.0, 0.0, 0.06]
+4. increase temperature.
+	Guessed: %s [0.87, 1.0, 0.0, 0.15, 0.38]
+5. raise the temperature.
+	Guessed: %s [0.67, 1.0, 0.0, 0.88, 0.37]
+6. increase heat.
+	Guessed: %s [0.67, 0.0, 0.49, 0.43, 1.0]
+7. decrease heat.
+	Guessed: %s [1.0, 0.02, 0.38, 0.0, 0.79]

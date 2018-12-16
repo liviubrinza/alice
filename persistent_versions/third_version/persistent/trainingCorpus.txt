@@ -3,8 +3,6 @@ greeting : hello
 greeting : hello there
 greeting : hi
 greeting : hi there
-greeting : greetings alice
-greeting : greetings to you
 greeting : hello alice
 greeting : hi alice
 greeting : hey there alice
@@ -15,6 +13,7 @@ greeting : good day
 greeting : good afternoon
 greeting : good evening
 greeting : good night
+greeting : what's up?
 greeting : hey
 greeting : howdy
 
@@ -26,8 +25,6 @@ lights on : would you please turn on the lights
 lights on : turn the light on
 lights on : it's dark in here
 lights on : make it brighter
-lights on : brighter please
-lights on : i want the room brighter
 lights on : i can't see
 lights on : i want to see
 lights on : i need to see
@@ -87,14 +84,11 @@ heat up : me so cold
 heat up : me is cold
 heat up : increase temperature
 heat up : raise the temperature
-heat up : raise the heat
 heat up : it's freezing
 heat up : it's freezing in here
 heat up : it's cold in here
 heat up : warm me up
 heat up : increase heat
-heat up : temperature up
-heat up : temperature increase
 
 heat down : make it colder
 heat down : make it cooler
@@ -121,10 +115,6 @@ heat down : me so hot
 heat down : it's getting hot in here
 heat down : it's getting warm in here
 heat down : decrease temperature
-heat down : temperature decrease
-heat down : decrease the temperature
 heat down : decrease heat
-heat down : decrease the heat
 heat down : heat down
-heat down : heat decrease
 heat down : lower the temperature
