@@ -42,7 +42,6 @@ def signal_handler(signal, frame):
 """========== Lifecycle ping =========="""
 def lifecycle_ping():
     while system_active:
-        print("Sending ping")
         mqttController.publish_lifecycle_ping()
         time.sleep(4)
 
