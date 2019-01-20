@@ -2,6 +2,8 @@ import json
 import random
 import signal
 import sys
+import threading
+import time
 
 from MQTTController import MqttController
 from NeuralNetwork import NeuralNetwork
@@ -23,17 +25,26 @@ controller_dict = {
     4 : zwaveController.decrease_thermostat_set_level
 }
 
+system_active = False
+
 """========== System shutdown =========="""
 def graceful_shutdown():
+    global system_active
     print("Closing A.L.I.C.E.")
+    system_active = False
     mqttController.shutdown()
     zwaveController.shutdown_network()
-
 
 def signal_handler(signal, frame):
     graceful_shutdown()
     sys.exit(0)
-"""====================================="""
+
+"""========== Lifecycle ping =========="""
+def lifecycle_ping():
+    while system_active:
+        print("Sending ping")
+        mqttController.publish_lifecycle_ping()
+        time.sleep(4)
 
 def get_alice_answer(command_category, value=None):
     response = random.choice(responses[command_category])
@@ -112,6 +123,8 @@ mqttController.publish_initial_config(zwaveController.get_configuration_values()
 
 try:
     signal.signal(signal.SIGINT, signal_handler)
+    system_active = True
+    threading.Thread(target=lifecycle_ping).start()
 
     while True:
         sentence = input("Enter command:")

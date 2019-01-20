@@ -15,6 +15,7 @@ class MqttController:
     OUTPUT_LIGHT_LEVEL_TOPIC = "lightLevel"
     OUTPUT_BATTERY_LEVEL_TOPIC = "batteryLevel"
     OUTPUT_INITIAL_CONFIG_TOPIC = "initialConfig"
+    OUTPUT_LIFECYCLE_TOPIC = "ping"
 
     def __init__(self):
         """
@@ -167,6 +168,12 @@ class MqttController:
         :param config: The dictionary containing the initial configuration values
         """
         self.mqtt_client.publish(self.OUTPUT_INITIAL_CONFIG_TOPIC, json.dumps(config))
+
+    def publish_lifecycle_ping(self):
+        """
+        Publishes a ping message notifying the interface that the backend system is still online
+        """
+        self.mqtt_client.publish(self.OUTPUT_LIFECYCLE_TOPIC, "ping")
 
     def shutdown(self):
         """
