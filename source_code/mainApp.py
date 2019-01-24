@@ -52,9 +52,9 @@ def get_alice_answer(command_category, value=None):
     if value:
         # light related change
         if command_category == 1 or command_category == 2:
-            response_suffix = "by" + str(value) + " percent"
+            response_suffix = " by" + str(value) + " percent"
         if command_category == 3 or command_category == 4:
-            response_suffix = "by" + str(value) + " degrees"
+            response_suffix = " by" + str(value) + " degrees"
 
         response += response_suffix
     
