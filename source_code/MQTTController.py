@@ -77,6 +77,7 @@ class MqttController:
             print("[INFO] <MqttController> Successfully set the configuration callback function")
             return True
         print("[WARN] <MqttController> Configuration callback function was already set")
+        return False
 
     def subscribe_to_topics(self):
         """
