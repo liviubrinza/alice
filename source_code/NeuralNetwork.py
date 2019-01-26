@@ -151,6 +151,13 @@ class NeuralNetwork:
         return normalized_values
 
     def classify(self, command):
+        """
+        Makes use of the imprecision threshold in order to return the classification result. In case none of the
+        results are over the specified threshold, the value -1 is returned
+
+        :param command: The command to be classified, in one hot encoding format
+        :return:
+        """
         values_pred_run = self.session.run(self.network_flow, feed_dict={self.x: command.reshape(1, self.input_layer_size)})
         #print("-> Bare predictions array: " + str(values_pred_run))
 
@@ -161,9 +168,12 @@ class NeuralNetwork:
             if guess > self.imprecision_threshold and guess != 1.0:
                 return -1, guesses
 
-        return guesses.index(1.0), guesses
+        return guesses.index(1), guesses
 
     def load(self):
+        """
+        Loads the previously trained and saved neural network tensorflow model.
+        """
         if not os.listdir(self.model_path):
             self.do_training()
 
@@ -175,6 +185,11 @@ class NeuralNetwork:
         self.saver.restore(self.session, self.model_path)
 
     def get_training_corpus_list(self):
+        """
+        Gets the entire content of the training corpus file.
+
+        :return: dictionary of entries, each one containing a class and a sentence
+        """
         file_handler = FileHandler()
         training_corpus = file_handler.read_training_corpus()
 
@@ -191,6 +206,11 @@ class NeuralNetwork:
         return entries_list
 
     def test_accuracy(self):
+        """
+        Only for testing purposes. Tests the structure of the neural network model against the entire suite of
+        training data, and prints out the number of both correctly and incorrectly classified commands, and the
+        overall accuracy percentage of the neural network.
+        """
         test_list = self.get_training_corpus_list()
 
         entries_count = len(test_list)
